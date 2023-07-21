@@ -1,0 +1,13 @@
+[
+  {
+    "name": "default",
+    "type": "mysql",
+    "host": "db-mysql-sgp1-95439-do-user-13533061-0.b.db.ondigitalocean.com",
+    "port": 25060,
+    "username": "duccao",
+    "password": "AVNS_0DlAkoOltYDWD0wPDzX",
+    "database": "",
+    "synchronize": false,
+    "entities": ["entities/*.js"]
+  }
+]
