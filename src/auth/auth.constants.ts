@@ -8,3 +8,9 @@ export enum AuthProvider {
   APPLE = 'apple',
   GITHUB = 'github',
 }
+
+export enum Role {
+  ADMIN = 'admin',
+  CUSTOMER = 'customer',
+  DRIVER = 'driver',
+}

@@ -13,10 +13,11 @@ import { User } from '../entities/user.entity';
 import * as generator from 'generate-password';
 import * as bcrypt from 'bcrypt';
 import { MailingService } from '../mailing/mailing.service';
-import { AuthProvider } from './auth.constants';
+import { AuthProvider, Role } from './auth.constants';
 import { log } from 'console';
 import { clouddebugger } from 'googleapis/build/src/apis/clouddebugger';
 import { UserService } from 'src/user/user.service';
+import { Customer } from 'src/entities/customer.entity';
 
 @Injectable()
 export class AuthService {
@@ -76,13 +77,27 @@ export class AuthService {
     console.log('password random: ', user.password);
     user.isActive = 0;
     // user.authProvider = AuthProvider.LOCAL;
+    //find role
     const role = userSignupDto.role; // Vai trò được chọn từ payload, ở đây ví dụ là "customer"
     const foundRole = await this.userService.findRoleByName(role);
     if (!foundRole) {
       throw new BadRequestException('Invalid role');
     }
+
     user.roleId = foundRole.roleId;
     const savedUser = await this.userService.create(user);
+    //save customer
+    if (foundRole.roleName === Role.CUSTOMER) {
+      const newCustomer = new Customer();
+      newCustomer.userId = savedUser.userId;
+      this.userService.saveCustomer(newCustomer);
+    }
+    //save driver
+    if (foundRole.roleName === Role.DRIVER) {
+      // const newDriver = new Customer();
+      // newDriver.userId = savedUser.userId;
+      // this.userService.saveDriver(newDriver);
+    }
     if (savedUser) {
       // await this.settingService.createDefaultSetting(savedUser.userId);
       const subject = 'Verficiaction Code';
