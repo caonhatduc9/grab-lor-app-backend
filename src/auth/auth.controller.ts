@@ -19,7 +19,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { LoginValidationPipe } from './pipes/login.validate.pipe';
 import { ChangePassDto } from './dto/changePass.dto';
 import { log } from 'console';
-import { request } from 'http';
 
 @Controller('auth')
 export class AuthController {
@@ -59,7 +58,7 @@ export class AuthController {
   getProfile(@Request() req: any): any {
     return req.user;
   }
-
+  @UseGuards(JwtAuthGuard)
   @Patch('changePass')
   changePassword(@Body() changePassDto: ChangePassDto): Promise<any> {
     return this.authService.changePassword(changePassDto);
