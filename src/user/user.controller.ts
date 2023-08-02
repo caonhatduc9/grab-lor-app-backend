@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Request, Param, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Request,
+  Param,
+  Put,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/auth.jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -11,8 +21,8 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly configService: ConfigService) { }
-
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get()
   findAll() {
@@ -27,15 +37,20 @@ export class UserController {
           cb(null, process.env.UPLOAD_FOLDER || 'uploads');
         },
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `avatar-${uniqueSuffix}${file.originalname}`);
         },
       }),
     }),
   )
-  async update(@Request() req: any, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file: Express.Multer.File) {
+  async update(
+    @Request() req: any,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     // Call your service to update the user with the file path or any other relevant information
-    console.log("file", file);
+    console.log('file', file);
     // return file;
     return this.userService.update(req.user.userId, updateUserDto, file);
   }

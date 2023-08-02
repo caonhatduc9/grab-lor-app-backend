@@ -1,17 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DriverLicense } from "./driverLicense.entity";
-import { User } from "./user.entity";
-import { Vehicle } from "./vehicle.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { DriverLicense } from './driverLicense.entity';
+import { User } from './user.entity';
+import { Vehicle } from './vehicle.entity';
 
-@Entity("asset", { schema: "grab_lor" })
+@Entity('asset', { schema: 'grab_lor' })
 export class Asset {
-  @PrimaryGeneratedColumn({ type: "int", name: "asset_id" })
+  @PrimaryGeneratedColumn({ type: 'int', name: 'asset_id' })
   assetId: number;
 
-  @Column("enum", { name: "type", enum: ["IMAGE", "AUDIO"] })
-  type: "IMAGE" | "AUDIO";
+  @Column('enum', { name: 'type', enum: ['IMAGE', 'AUDIO'] })
+  type: 'IMAGE' | 'AUDIO';
 
-  @Column("text", { name: "url" })
+  @Column('text', { name: 'url' })
   url: string;
 
   @OneToMany(() => DriverLicense, (driverLicense) => driverLicense.image2)

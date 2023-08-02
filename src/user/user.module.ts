@@ -12,4 +12,4 @@ import { UploadImageModule } from 'src/upload-image/upload-image.module';
   providers: [UserService, ...UserProviders],
   exports: [UserService, ...UserProviders],
 })
-export class UserModule { }
+export class UserModule {}

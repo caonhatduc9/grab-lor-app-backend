@@ -5,28 +5,28 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { Booking } from "./booking.entity";
+} from 'typeorm';
+import { Booking } from './booking.entity';
 
-@Index("evaluate_fk0", ["bookingId"], {})
-@Entity("evaluate", { schema: "grab_lor" })
+@Index('evaluate_fk0', ['bookingId'], {})
+@Entity('evaluate', { schema: 'grab_lor' })
 export class Evaluate {
-  @PrimaryGeneratedColumn({ type: "int", name: "evalute_id" })
+  @PrimaryGeneratedColumn({ type: 'int', name: 'evalute_id' })
   evaluteId: number;
 
-  @Column("int", { name: "booking_id" })
+  @Column('int', { name: 'booking_id' })
   bookingId: number;
 
-  @Column("text", { name: "content" })
+  @Column('text', { name: 'content' })
   content: string;
 
-  @Column("int", { name: "start" })
+  @Column('int', { name: 'start' })
   start: number;
 
   @ManyToOne(() => Booking, (booking) => booking.evaluates, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: "booking_id", referencedColumnName: "bookingId" }])
+  @JoinColumn([{ name: 'booking_id', referencedColumnName: 'bookingId' }])
   booking: Booking;
 }

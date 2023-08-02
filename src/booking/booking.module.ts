@@ -5,6 +5,6 @@ import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
 
 @Module({
   controllers: [BookingController],
-  providers: [BookingService, PricingStrategyFactory]
+  providers: [BookingService, PricingStrategyFactory],
 })
-export class BookingModule { }
+export class BookingModule {}

@@ -14,9 +14,10 @@ export class UserService {
     @Inject('USER_REPOSITORY') private userRepository: Repository<User>,
     @Inject('ROLE_REPOSITORY') private roleRepository: Repository<Role>,
     @Inject('ASSET_REPOSITORY') private assetRepository: Repository<Asset>,
-    @Inject('CUSTOMER_REPOSITORY') private customerRepository: Repository<Customer>,
+    @Inject('CUSTOMER_REPOSITORY')
+    private customerRepository: Repository<Customer>,
     private readonly uploadImageService: UploadImageService,
-  ) { }
+  ) {}
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
@@ -48,8 +49,11 @@ export class UserService {
   async saveCustomer(customer: Customer): Promise<Customer> {
     return await this.customerRepository.save(customer);
   }
-  async update(userId: number, updateUserDto: UpdateUserDto, fileAvatar: Express.Multer.File): Promise<any> {
-
+  async update(
+    userId: number,
+    updateUserDto: UpdateUserDto,
+    fileAvatar: Express.Multer.File,
+  ): Promise<any> {
     const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
@@ -59,14 +63,17 @@ export class UserService {
     user.phoneNumber = updateUserDto.phoneNumber;
     // Object.assign(user, { ...updateUserDto })
     if (fileAvatar) {
-      const uploadedImage = await this.uploadImageService.uploadImage(fileAvatar);
+      const uploadedImage = await this.uploadImageService.uploadImage(
+        fileAvatar,
+      );
       if (uploadedImage) {
-        const foundAsset = await this.assetRepository.findOneBy({ assetId: user.avatar });
+        const foundAsset = await this.assetRepository.findOneBy({
+          assetId: user.avatar,
+        });
         if (foundAsset) {
           foundAsset.url = uploadedImage.url;
           await this.assetRepository.save(foundAsset);
-        }
-        else {
+        } else {
           const newAsset = await this.saveAvatarUrl(uploadedImage.url);
           user.avatar = newAsset.assetId;
         }
@@ -76,7 +83,7 @@ export class UserService {
     return {
       statusCode: 200,
       message: 'Update user successfully',
-    }
+    };
     // if(user.role.roleName ===)
     // const newAsset = await this.saveAvatarUrl(avatarUrl.path);
     // user.avatarUrl = newAsset.url;

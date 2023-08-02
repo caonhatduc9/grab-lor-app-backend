@@ -25,7 +25,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private maillingService: MailingService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
     console.log('check user', email, password);
@@ -107,12 +107,10 @@ export class AuthService {
         statusCode: 200,
         message: 'sign up success',
       };
-    }
-    else {
+    } else {
       throw new InternalServerErrorException();
     }
   }
-
 
   async googleLogin(user: any) {
     if (!user) {
@@ -156,7 +154,6 @@ export class AuthService {
       }
       createUser.roleId = foundRole.roleId;
 
-
       const savedUser = await this.userService.create(createUser);
       if (savedUser) {
         // await this.settingService.createDefaultSetting(savedUser.userId);
@@ -171,13 +168,11 @@ export class AuthService {
             avatarURL: savedUser.avatar,
           },
         };
-      }
-      else {
+      } else {
         throw new InternalServerErrorException();
       }
     }
   }
-
 
   async changePassword(changePassDto: ChangePassDto): Promise<any> {
     console.log('check change passs', changePassDto);
@@ -237,6 +232,4 @@ export class AuthService {
       throw new InternalServerErrorException();
     }
   }
-
-
 }

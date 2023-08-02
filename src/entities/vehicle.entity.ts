@@ -6,35 +6,35 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { Driver } from "./driver.entity";
-import { Asset } from "./asset.entity";
+} from 'typeorm';
+import { Driver } from './driver.entity';
+import { Asset } from './asset.entity';
 
-@Index("vehicle_fk0", ["image"], {})
-@Entity("vehicle", { schema: "grab_lor" })
+@Index('vehicle_fk0', ['image'], {})
+@Entity('vehicle', { schema: 'grab_lor' })
 export class Vehicle {
-  @PrimaryGeneratedColumn({ type: "int", name: "vehicle_id" })
+  @PrimaryGeneratedColumn({ type: 'int', name: 'vehicle_id' })
   vehicleId: number;
 
-  @Column("enum", { name: "type", enum: ["CAR", "MOTORBIKE"] })
-  type: "CAR" | "MOTORBIKE";
+  @Column('enum', { name: 'type', enum: ['CAR', 'MOTORBIKE'] })
+  type: 'CAR' | 'MOTORBIKE';
 
-  @Column("varchar", { name: "license_plates", length: 15 })
+  @Column('varchar', { name: 'license_plates', length: 15 })
   licensePlates: string;
 
-  @Column("int", { name: "displacement" })
+  @Column('int', { name: 'displacement' })
   displacement: number;
 
-  @Column("int", { name: "image" })
+  @Column('int', { name: 'image' })
   image: number;
 
   @OneToMany(() => Driver, (driver) => driver.vehicle2)
   drivers: Driver[];
 
   @ManyToOne(() => Asset, (asset) => asset.vehicles, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: "image", referencedColumnName: "assetId" }])
+  @JoinColumn([{ name: 'image', referencedColumnName: 'assetId' }])
   image2: Asset;
 }

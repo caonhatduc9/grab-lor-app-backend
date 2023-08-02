@@ -15,6 +15,6 @@ import { ConfigService } from '@nestjs/config';
   ],
   controllers: [UploadImageController],
   providers: [UploadImageService],
-  exports: [UploadImageService]
+  exports: [UploadImageService],
 })
-export class UploadImageModule { }
+export class UploadImageModule {}

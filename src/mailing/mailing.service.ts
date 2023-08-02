@@ -9,7 +9,7 @@ export class MailingService {
   constructor(
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
-  ) { }
+  ) {}
 
   private async setTransport() {
     const OAuth2 = google.auth.OAuth2;

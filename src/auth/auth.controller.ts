@@ -22,7 +22,7 @@ import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req: any) {
@@ -40,7 +40,7 @@ export class AuthController {
   //   // return HttpStatus.OK;
   // }
   async google(@Body() user: any): Promise<any> {
-    console.log("BODY", user);
+    console.log('BODY', user);
     return this.authService.googleLogin(user);
   }
 
@@ -49,9 +49,6 @@ export class AuthController {
   // googleAuthRedirect(@Request() req) {
   //   return this.authService.googleLogin(req);
   // }
-
-
-
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -68,5 +65,4 @@ export class AuthController {
   forgotPassword(@Body('email') email: string): Promise<any> {
     return this.authService.forgotPassword(email);
   }
-
 }

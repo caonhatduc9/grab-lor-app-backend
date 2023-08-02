@@ -1,6 +1,5 @@
-
 export class CreateCustomerDto {
-    userId: number;
-    point: number;
-    isVip: boolean;
+  userId: number;
+  point: number;
+  isVip: boolean;
 }

@@ -9,10 +9,17 @@ import { UserModule } from './user/user.module';
 import { BookingModule } from './booking/booking.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-  }), DatabaseModule, AuthModule, UploadImageModule, UserModule, BookingModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    DatabaseModule,
+    AuthModule,
+    UploadImageModule,
+    UserModule,
+    BookingModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

@@ -9,8 +9,8 @@ import { ShareProviders } from './share.providers';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-    imports: [DatabaseModule],
-    providers: [...ShareProviders],
-    exports: [...ShareProviders], // Export provider để các module khác có thể sử dụng
+  imports: [DatabaseModule],
+  providers: [...ShareProviders],
+  exports: [...ShareProviders], // Export provider để các module khác có thể sử dụng
 })
-export class SharedModule { }
+export class SharedModule {}

@@ -1,17 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Driver } from "./driver.entity";
-import { Route } from "./route.entity";
-import { Stop } from "./stop.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Driver } from './driver.entity';
+import { Route } from './route.entity';
+import { Stop } from './stop.entity';
 
-@Entity("location", { schema: "grab_lor" })
+@Entity('location', { schema: 'grab_lor' })
 export class Location {
-  @PrimaryGeneratedColumn({ type: "int", name: "location_id" })
+  @PrimaryGeneratedColumn({ type: 'int', name: 'location_id' })
   locationId: number;
 
-  @Column("varchar", { name: "latitude", length: 100 })
+  @Column('varchar', { name: 'latitude', length: 100 })
   latitude: string;
 
-  @Column("varchar", { name: "longitude", length: 100 })
+  @Column('varchar', { name: 'longitude', length: 100 })
   longitude: string;
 
   @OneToMany(() => Driver, (driver) => driver.location2)
