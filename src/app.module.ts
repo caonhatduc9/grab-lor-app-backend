@@ -6,11 +6,12 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { UploadImageModule } from './upload-image/upload-image.module';
 import { UserModule } from './user/user.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), DatabaseModule, AuthModule, UploadImageModule, UserModule],
+  }), DatabaseModule, AuthModule, UploadImageModule, UserModule, BookingModule],
   controllers: [AppController],
   providers: [AppService],
 })
