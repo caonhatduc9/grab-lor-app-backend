@@ -15,7 +15,7 @@ export class PricingStrategyFactory {
   //   return new FlexiblePricingStrategy();
   // }
 
-  createPricingStrategy(strategyType: string): PricingStrategy {
+  createPricingStrategy(strategyType: string = "default"): PricingStrategy {
     switch (strategyType) {
       case 'premium':
         return new PremiumPricingStrategy();
