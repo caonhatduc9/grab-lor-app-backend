@@ -8,6 +8,7 @@ import { CreateCustomerDto } from './dto/createCustomer.dto';
 import { Customer } from 'src/entities/customer.entity';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { UploadImageService } from 'src/upload-image/upload-image.service';
+import { Driver } from 'src/entities/driver.entity';
 @Injectable()
 export class UserService {
   constructor(
@@ -16,8 +17,10 @@ export class UserService {
     @Inject('ASSET_REPOSITORY') private assetRepository: Repository<Asset>,
     @Inject('CUSTOMER_REPOSITORY')
     private customerRepository: Repository<Customer>,
+    @Inject('DRIVER_REPOSITORY')
+    private driverRepository: Repository<Driver>,
     private readonly uploadImageService: UploadImageService,
-  ) {}
+  ) { }
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
@@ -88,5 +91,12 @@ export class UserService {
     // const newAsset = await this.saveAvatarUrl(avatarUrl.path);
     // user.avatarUrl = newAsset.url;
     // return await this.userRepository.save(user);
+  }
+
+  async getDrivers(): Promise<Driver[]> {
+    const drivers = await this.driverRepository.createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.location2', 'location')
+      .getMany();
+    return drivers;
   }
 }

@@ -8,11 +8,11 @@ export class Location {
   @PrimaryGeneratedColumn({ type: 'int', name: 'location_id' })
   locationId: number;
 
-  @Column('varchar', { name: 'latitude', length: 100 })
-  latitude: string;
+  @Column('varchar', { name: 'lat', length: 100 })
+  lat: string;
 
-  @Column('varchar', { name: 'longitude', length: 100 })
-  longitude: string;
+  @Column('varchar', { name: 'lon', length: 100 })
+  lon: string;
 
   @OneToMany(() => Driver, (driver) => driver.location2)
   drivers: Driver[];
