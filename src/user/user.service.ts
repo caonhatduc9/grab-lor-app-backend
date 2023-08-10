@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from './dto/createUser.dto';
 import { Role } from 'src/entities/role.entity';
-import { Asset } from 'output/entities/Asset';
+import { Asset } from '../entities/asset.entity';
 import { CreateCustomerDto } from './dto/createCustomer.dto';
 import { Customer } from 'src/entities/customer.entity';
 import { UpdateUserDto } from './dto/updateUser.dto';
