@@ -35,8 +35,18 @@ export class User {
   @Column("varchar", { name: "phone_number", nullable: true, length: 12 })
   phoneNumber: string | null;
 
-  @Column("int", { name: "avatar" })
-  avatar: number;
+  @Column("int", { name: "avatar", nullable: true })
+  avatar: number | null;
+
+  @Column("tinyint", { name: "isActive", nullable: true })
+  isActive: number | null;
+
+  @Column("enum", {
+    name: "auth_provider",
+    enum: ["local", "google", "apple", "github"],
+    default: () => "'local'",
+  })
+  authProvider: "local" | "google" | "apple" | "github";
 
   @OneToMany(() => CallCenterAgent, (callCenterAgent) => callCenterAgent.user)
   callCenterAgents: CallCenterAgent[];

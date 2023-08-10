@@ -62,6 +62,7 @@ export class GoogleMapsService {
         });
 
         if (nearestDriverIndex !== -1) {
+            console.log("drivers[nearestDriverIndex]", drivers[nearestDriverIndex]);
             return drivers[nearestDriverIndex];
         } else {
             throw new Error('No driver found.');

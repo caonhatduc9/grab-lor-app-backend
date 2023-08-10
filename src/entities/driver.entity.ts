@@ -12,6 +12,7 @@ import { User } from './user.entity';
 import { Location } from './location.entity';
 import { DriverLicense } from './driverLicense.entity';
 import { Vehicle } from './vehicle.entity';
+import { SocketDriver } from './socketDriver.entity';
 
 @Index('driver_fk0', ['userId'], {})
 @Index('driver_fk1', ['location'], {})
@@ -75,4 +76,6 @@ export class Driver {
   })
   @JoinColumn([{ name: 'vehicle', referencedColumnName: 'vehicleId' }])
   vehicle2: Vehicle;
+  @OneToMany(() => SocketDriver, (socketDriver) => socketDriver.driver)
+  socketDrivers: SocketDriver[];
 }

@@ -8,10 +8,11 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Booking } from "./Booking";
-import { User } from "./User";
-import { Location } from "./Location";
-import { DriverLicense } from "./DriverLicense";
 import { Vehicle } from "./Vehicle";
+import { Location } from "./Location";
+import { User } from "./User";
+import { DriverLicense } from "./DriverLicense";
+import { SocketDriver } from "./SocketDriver";
 
 @Index("driver_fk0", ["userId"], {})
 @Index("driver_fk1", ["location"], {})
@@ -46,12 +47,12 @@ export class Driver {
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];
 
-  @ManyToOne(() => User, (user) => user.drivers, {
+  @ManyToOne(() => Vehicle, (vehicle) => vehicle.drivers, {
     onDelete: "NO ACTION",
     onUpdate: "NO ACTION",
   })
-  @JoinColumn([{ name: "user_id", referencedColumnName: "userId" }])
-  user: User;
+  @JoinColumn([{ name: "vehicle", referencedColumnName: "vehicleId" }])
+  vehicle2: Vehicle;
 
   @ManyToOne(() => Location, (location) => location.drivers, {
     onDelete: "NO ACTION",
@@ -59,6 +60,13 @@ export class Driver {
   })
   @JoinColumn([{ name: "location", referencedColumnName: "locationId" }])
   location2: Location;
+
+  @ManyToOne(() => User, (user) => user.drivers, {
+    onDelete: "NO ACTION",
+    onUpdate: "NO ACTION",
+  })
+  @JoinColumn([{ name: "user_id", referencedColumnName: "userId" }])
+  user: User;
 
   @ManyToOne(() => DriverLicense, (driverLicense) => driverLicense.drivers, {
     onDelete: "NO ACTION",
@@ -69,10 +77,6 @@ export class Driver {
   ])
   driverLicense2: DriverLicense;
 
-  @ManyToOne(() => Vehicle, (vehicle) => vehicle.drivers, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "vehicle", referencedColumnName: "vehicleId" }])
-  vehicle2: Vehicle;
+  @OneToMany(() => SocketDriver, (socketDriver) => socketDriver.driver)
+  socketDrivers: SocketDriver[];
 }

@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Booking } from './booking.entity';
 import { User } from './user.entity';
+import { SocketCustomer } from './socketCustomer.entity';
 
 @Index('customer_fk0', ['userId'], {})
 @Entity('customer', { schema: 'grab_lor' })
@@ -34,4 +35,8 @@ export class Customer {
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'userId' }])
   user: User;
+
+  @OneToMany(() => SocketCustomer, (socketCustomer) => socketCustomer.customer)
+  socketCustomers: SocketCustomer[];
+
 }

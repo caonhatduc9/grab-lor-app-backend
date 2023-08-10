@@ -99,4 +99,8 @@ export class UserService {
       .getMany();
     return drivers;
   }
+  async getDriver(driverId: number): Promise<Driver> {
+    const driver = await this.driverRepository.findOne({ where: { driverId } });
+    return driver;
+  }
 }

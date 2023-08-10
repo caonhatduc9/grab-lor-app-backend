@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateGatewayDriverDto } from './dto/create-gateway-driver.dto';
 import { UpdateGatewayDriverDto } from './dto/update-gateway-driver.dto';
+import { Server } from 'socket.io'
+import { Repository } from 'typeorm';
+import { WebSocketServer } from '@nestjs/websockets';
+import { SocketDriver } from 'src/entities/socketDriver.entity';
+import { UserService } from 'src/user/user.service';
+import { SocketCustomer } from 'src/entities/socketCustomer.entity';
 
 @Injectable()
 export class GatewayDriverService {
-  create(createGatewayDriverDto: CreateGatewayDriverDto) {
-    return 'This action adds a new gatewayDriver';
+  // private server: Server;
+  constructor(@Inject('SOCKET_DRIVER_REPOSITORY') private gatewayDriverRepository: Repository<SocketDriver>,
+    @Inject('SOCKET_CUSTOMER_REPOSITORY') private gatewayCustomerRepository: Repository<SocketCustomer>,// private userService: UserService
+  ) { }
+
+
+  async addDriverSocket(driverId: string, socketId: string): Promise<SocketDriver> {
+    // const driver = await this.userService.getDriver(+driverId);
+    const newSoketDriver = new SocketDriver();
+    newSoketDriver.driverId = +driverId;
+    newSoketDriver.socketId = socketId;
+    return this.gatewayDriverRepository.save(newSoketDriver);
   }
 
-  findAll() {
-    return `This action returns all gatewayDriver`;
+  async getDriverSocketById(driverId: number): Promise<SocketDriver> {
+    const socket = await this.gatewayDriverRepository.findOne({ where: { driverId } });
+    // console.log("socket", socket.socketId);
+    return socket;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} gatewayDriver`;
+  async removeDriverSocket(driverId: number): Promise<void> {
+    await this.gatewayDriverRepository.delete({ driverId });
   }
 
-  update(id: number, updateGatewayDriverDto: UpdateGatewayDriverDto) {
-    return `This action updates a #${id} gatewayDriver`;
+
+  async addCustomerSocket(customerId: string, socketId: string): Promise<SocketCustomer> {
+    // const driver = await this.userService.getDriver(+driverId);
+    const newSoketCustomer = new SocketCustomer();
+    newSoketCustomer.customerId = +customerId;
+    newSoketCustomer.socketId = socketId;
+    return this.gatewayCustomerRepository.save(newSoketCustomer);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} gatewayDriver`;
+  async getCustomerSocketById(customerId: number): Promise<SocketCustomer> {
+    const socket = await this.gatewayCustomerRepository.findOne({ where: { customerId } });
+    // console.log("socket", socket.socketId);
+    return socket;
   }
+
+  async removeCustomerSocket(customerId: number): Promise<void> {
+    await this.gatewayCustomerRepository.delete({ customerId });
+  }
+  // async sendRideRequestToDriver(driverId: string, payload: any) {
+  //   const socketId = await this.getDriverSocketId(driverId);
+  //   if (socketId) {
+  //     this.gatewayDriverGateway.server.to(socketId).emit('rideRequest', payload);
+  //   }
+  // }
 }

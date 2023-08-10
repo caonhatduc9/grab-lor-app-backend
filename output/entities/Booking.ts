@@ -7,9 +7,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Route } from "./Route";
 import { Customer } from "./Customer";
 import { Driver } from "./Driver";
-import { Route } from "./Route";
 import { Evaluate } from "./Evaluate";
 
 @Index("booking_fk0", ["customerId"], {})
@@ -47,6 +47,13 @@ export class Booking {
   @Column("text", { name: "note" })
   note: string;
 
+  @ManyToOne(() => Route, (route) => route.bookings, {
+    onDelete: "NO ACTION",
+    onUpdate: "NO ACTION",
+  })
+  @JoinColumn([{ name: "route_id", referencedColumnName: "routeId" }])
+  route: Route;
+
   @ManyToOne(() => Customer, (customer) => customer.bookings, {
     onDelete: "NO ACTION",
     onUpdate: "NO ACTION",
@@ -60,13 +67,6 @@ export class Booking {
   })
   @JoinColumn([{ name: "driver_id", referencedColumnName: "driverId" }])
   driver: Driver;
-
-  @ManyToOne(() => Route, (route) => route.bookings, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "route_id", referencedColumnName: "routeId" }])
-  route: Route;
 
   @OneToMany(() => Evaluate, (evaluate) => evaluate.booking)
   evaluates: Evaluate[];
