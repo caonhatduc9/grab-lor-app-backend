@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Booking } from './booking.entity';
@@ -47,7 +48,7 @@ export class Driver {
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];
 
-  @ManyToOne(() => User, (user) => user.drivers, {
+  @OneToOne(() => User, (user) => user.driver, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })

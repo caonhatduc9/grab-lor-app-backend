@@ -7,7 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UploadImageModule } from './upload-image/upload-image.module';
 import { UserModule } from './user/user.module';
 import { BookingModule } from './booking/booking.module';
-import { GatewayDriverModule } from './gateway-driver/gateway-driver.module';
+import { GatewayBookingModule } from './gateway-booking/gateway-booking.module';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { GatewayDriverModule } from './gateway-driver/gateway-driver.module';
     UploadImageModule,
     UserModule,
     BookingModule,
-    GatewayDriverModule,
+    GatewayBookingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

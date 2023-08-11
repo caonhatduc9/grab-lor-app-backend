@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CallCenterAgent } from './callCenterAgent.entity';
@@ -56,14 +57,14 @@ export class User {
   })
   authProvider: AuthProvider;
 
-  @OneToMany(() => CallCenterAgent, (callCenterAgent) => callCenterAgent.user)
+  @OneToOne(() => CallCenterAgent, (callCenterAgent) => callCenterAgent.user)
   callCenterAgents: CallCenterAgent[];
 
-  @OneToMany(() => Customer, (customer) => customer.user)
-  customers: Customer[];
+  @OneToOne(() => Customer, (customer) => customer.user)
+  customer: Customer[];
 
-  @OneToMany(() => Driver, (driver) => driver.user)
-  drivers: Driver[];
+  @OneToOne(() => Driver, (driver) => driver.user)
+  driver: Driver[];
 
   @ManyToOne(() => Role, (role) => role.users, {
     onDelete: 'NO ACTION',

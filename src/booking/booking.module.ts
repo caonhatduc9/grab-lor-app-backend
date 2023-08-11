@@ -3,10 +3,10 @@ import { BookingService } from './booking.service';
 import { BookingController } from './booking.controller';
 import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
 import { UserModule } from 'src/user/user.module';
-import { GatewayDriverModule } from 'src/gateway-driver/gateway-driver.module';
+import { GatewayBookingModule } from '../gateway-booking/gateway-booking.module';
 
 @Module({
-  imports: [UserModule, GatewayDriverModule],
+  imports: [UserModule, GatewayBookingModule],
   controllers: [BookingController],
   providers: [BookingService, PricingStrategyFactory],
 })

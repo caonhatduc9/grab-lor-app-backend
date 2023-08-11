@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Booking } from './booking.entity';
@@ -29,7 +30,7 @@ export class Customer {
   @OneToMany(() => Booking, (booking) => booking.customer)
   bookings: Booking[];
 
-  @ManyToOne(() => User, (user) => user.customers, {
+  @OneToOne(() => User, (user) => user.customer, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })

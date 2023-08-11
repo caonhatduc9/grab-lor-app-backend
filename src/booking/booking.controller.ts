@@ -2,14 +2,14 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
 import { GoogleMapsService } from 'src/shareModule/googleMap.service';
-import { GatewayDriverService } from 'src/gateway-driver/gateway-driver.service';
-import { GatewayDriverGateway } from 'src/gateway-driver/gateway-driver.gateway';
+import { GatewayBookingService } from '../gateway-booking/gateway-booking.service';
+import { GatewayBookingGateway } from '../gateway-booking/gateway-booking.gateway';
 
 @Controller('booking')
 export class BookingController {
   constructor(private readonly bookingService: BookingService,
-    private readonly gatewayDriverService: GatewayDriverService,
-    private gatewayDriverGateway: GatewayDriverGateway,
+    private readonly gatewayBookingService: GatewayBookingService,
+    private gatewayBookingGateway: GatewayBookingGateway,
   ) { }
 
   // @Post()
@@ -26,12 +26,10 @@ export class BookingController {
   async requestRide(@Body() body: any): Promise<any> {
     const { customer, pickup, destination, vehicleType } = body;
     try {
-      const result = await this.bookingService.createBooking(pickup);
-  console.log("result", result);
+      const result = await this.bookingService.createBooking(body);
+      console.log("result", result);
       if (result.message === 'Ride requested') {
-        // const customerSocket = await this.gatewayDriverService.getCustomerSocketById(result.nearestDriver.driverId);
-        // if (customerSocket) {
-        this.gatewayDriverGateway.sendDriverInfoToCustomer(result.nearestDriver);
+        this.gatewayBookingGateway.sendDriverInfoToCustomer(result.nearestDriver);
       }
       return {
         statusCode: result.statusCode,
@@ -43,7 +41,6 @@ export class BookingController {
         message: 'Error requesting ride'
       };
     }
-    // return this.bookingService.createBooking(pickup);
   }
 
 }

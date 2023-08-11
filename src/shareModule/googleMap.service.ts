@@ -14,31 +14,7 @@ export class GoogleMapsService {
         });
     }
 
-    // async findNearestDriver(currentLocation: { lat: number; lon: number }): Promise<any> {
-    //     return new Promise((resolve, reject) => {
-    //         this.googleMapsClient.directions(
-    //             {
-    //                 origin: `${currentLocation.lat},${currentLocation.lon}`,
-    //                 destination: `${currentLocation.lat},${currentLocation.lon}`,
-    //                 travelMode: 'driving', // Chỉ định phương tiện là xe hơi
-    //                 waypoints: 'optimize:true', // Tối ưu hóa các điểm dừng giữa điểm đầu và điểm cuối
-    //             },
-    //             (err, response) => {
-    //                 if (err) {
-    //                     reject(err);
-    //                     return;
-    //                 }
 
-    //                 // Lấy thông tin chi tiết về tuyến đường tối ưu
-    //                 const route = response.json.routes[0];
-    //                 // Lấy vị trí gần nhất trong tuyến đường
-    //                 const nearestLocation = route.legs[0].start_location;
-
-    //                 resolve(nearestLocation);
-    //             },
-    //         );
-    //     });
-    // }
     async findNearestDriver(pickupCoordinates: { lat: number; lon: number }, drivers: any): Promise<any> {
         const destinations = drivers.map(driver => `${driver.location2.lat},${driver.location2.lon}`).join('|');
 
@@ -68,4 +44,5 @@ export class GoogleMapsService {
             throw new Error('No driver found.');
         }
     }
+
 }

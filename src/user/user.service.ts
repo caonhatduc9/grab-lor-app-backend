@@ -9,6 +9,7 @@ import { Customer } from 'src/entities/customer.entity';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { UploadImageService } from 'src/upload-image/upload-image.service';
 import { Driver } from 'src/entities/driver.entity';
+import { Location } from 'src/entities/location.entity';
 @Injectable()
 export class UserService {
   constructor(
@@ -19,6 +20,8 @@ export class UserService {
     private customerRepository: Repository<Customer>,
     @Inject('DRIVER_REPOSITORY')
     private driverRepository: Repository<Driver>,
+    @Inject('LOCATION_REPOSITORY')
+    private locationRepository: Repository<Location>,
     private readonly uploadImageService: UploadImageService,
   ) { }
   async findAll(): Promise<User[]> {
@@ -49,6 +52,15 @@ export class UserService {
     newAsset.type = 'IMAGE';
     return await this.assetRepository.save(newAsset);
   }
+
+  async getUserCustomerById(customerId: number): Promise<any> {
+    const result = await this.userRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.customer', 'customer')
+      .where('customer.customerId = :customerId', { customerId })
+      .getOne();
+    return result;
+  }
+
   async saveCustomer(customer: Customer): Promise<Customer> {
     return await this.customerRepository.save(customer);
   }
@@ -99,8 +111,28 @@ export class UserService {
       .getMany();
     return drivers;
   }
+  async getDriversOnline(): Promise<Driver[]> {
+    const drivers = await this.driverRepository.createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.location2', 'location')
+      .where('driver.status = :status', { status: 'online' })
+      .getMany();
+    return drivers;
+  }
   async getDriver(driverId: number): Promise<Driver> {
     const driver = await this.driverRepository.findOne({ where: { driverId } });
     return driver;
+  }
+  async updateLocationDriver(driverId: number, location: { lat: number, lon: number }): Promise<any> {
+    const driver = await this.driverRepository.findOne({ where: { driverId } });
+    if (!driver) {
+      throw new NotFoundException(`Driver with id ${driverId} not found`);
+    }
+
+    const updateLocation = new Location();
+    updateLocation.locationId = driver.location;
+    updateLocation.lat = location.lat.toString();
+    updateLocation.lon = location.lon.toString();
+    console.log("ago to update location");
+    return await this.locationRepository.save(updateLocation);
   }
 }
