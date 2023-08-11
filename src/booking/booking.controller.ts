@@ -7,10 +7,11 @@ import { GatewayBookingGateway } from '../gateway-booking/gateway-booking.gatewa
 
 @Controller('booking')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService,
+  constructor(
+    private readonly bookingService: BookingService,
     private readonly gatewayBookingService: GatewayBookingService,
     private gatewayBookingGateway: GatewayBookingGateway,
-  ) { }
+  ) {}
 
   // @Post()
   @Get('getPrice')
@@ -21,26 +22,26 @@ export class BookingController {
     return this.bookingService.calculatePrice(distanceInKm, vehicleType);
   }
 
-
   @Post('request-ride')
   async requestRide(@Body() body: any): Promise<any> {
     const { customer, pickup, destination, vehicleType } = body;
     try {
       const result = await this.bookingService.createBooking(body);
-      console.log("result", result);
+      console.log('result', result);
       if (result.message === 'Ride requested') {
-        this.gatewayBookingGateway.sendDriverInfoToCustomer(result.nearestDriver);
+        this.gatewayBookingGateway.sendDriverInfoToCustomer(
+          result.nearestDriver,
+        );
       }
       return {
         statusCode: result.statusCode,
         message: result.message,
-      }
+      };
     } catch (error) {
       return {
         statusCode: 500,
-        message: 'Error requesting ride'
+        message: 'Error requesting ride',
       };
     }
   }
-
 }

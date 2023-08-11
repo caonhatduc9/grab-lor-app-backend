@@ -39,5 +39,4 @@ export class Customer {
 
   @OneToMany(() => SocketCustomer, (socketCustomer) => socketCustomer.customer)
   socketCustomers: SocketCustomer[];
-
 }

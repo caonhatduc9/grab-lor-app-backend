@@ -15,14 +15,18 @@ export class FlexiblePricingStrategy implements PricingStrategy {
     const pricingResponse: PricingRespone = {
       motorbikeCost: 0,
       carCost: 0,
-    }
+    };
     let remainingDistance = distanceInKm;
 
     for (const step of pricingConfig) {
       if (remainingDistance <= 0) break;
 
-      const pricePerKm = vehicleType === 'car' ? step.pricePerKmCar : step.pricePerKmMotorbike;
-      const stepDistance = Math.min(remainingDistance, step.kmEnd - step.kmStart + 1);
+      const pricePerKm =
+        vehicleType === 'car' ? step.pricePerKmCar : step.pricePerKmMotorbike;
+      const stepDistance = Math.min(
+        remainingDistance,
+        step.kmEnd - step.kmStart + 1,
+      );
       const stepCost = pricePerKm * stepDistance;
 
       if (vehicleType) {
@@ -33,7 +37,8 @@ export class FlexiblePricingStrategy implements PricingStrategy {
         }
       } else {
         pricingResponse.carCost += step.pricePerKmCar * stepDistance;
-        pricingResponse.motorbikeCost += step.pricePerKmMotorbike * stepDistance;
+        pricingResponse.motorbikeCost +=
+          step.pricePerKmMotorbike * stepDistance;
       }
 
       remainingDistance -= stepDistance;

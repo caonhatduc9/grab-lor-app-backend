@@ -17,7 +17,7 @@ export class BookingService {
     private userService: UserService,
     private googleMapService: GoogleMapsService,
     private gatewayBookingService: GatewayBookingService,
-    private gatewayBookingGateway: GatewayBookingGateway
+    private gatewayBookingGateway: GatewayBookingGateway,
   ) {
     this.pricingStrategyFactory = pricingStrategyFactory;
   }
@@ -51,27 +51,35 @@ export class BookingService {
     const customer = await this.getInforCustomer(+body.customerId);
     try {
       // find nearest driver
-      const nearestDriver = await this.googleMapService.findNearestDriver(body.pickup, drivers);
+      const nearestDriver = await this.googleMapService.findNearestDriver(
+        body.pickup,
+        drivers,
+      );
       // console.log("nearestDriver", nearestDriver);
-      const driverSocket = await this.gatewayBookingService.getDriverSocketById(nearestDriver.driverId);
+      const driverSocket = await this.gatewayBookingService.getDriverSocketById(
+        nearestDriver.driverId,
+      );
       //send request book to the driver
       if (driverSocket) {
-        this.gatewayBookingGateway.sendRideRequestToDriver(nearestDriver.driverId, { customer, pickup, destination, vehicleType, paymentMethod });
+        this.gatewayBookingGateway.sendRideRequestToDriver(
+          nearestDriver.driverId,
+          { customer, pickup, destination, vehicleType, paymentMethod },
+        );
         return {
           statusCode: 200,
           message: 'Ride requested',
-          nearestDriver: nearestDriver
+          nearestDriver: nearestDriver,
         };
       } else {
         return {
           statusCode: 404,
-          message: 'Driver not available'
+          message: 'Driver not available',
         };
       }
     } catch (error) {
       return {
         statusCode: 404,
-        message: 'No available driver found'
+        message: 'No available driver found',
       };
     }
   }

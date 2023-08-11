@@ -17,7 +17,6 @@
 //     private userService: UserService
 //   ) { }
 
-
 //   async addDriverSocket(driverId: number, socketId: string): Promise<SocketDriver> {
 //     // const driver = await this.userService.getDriver(+driverId);
 //     const existingSocket = await this.gatewayDriverRepository.findOne({ where: { driverId } });
@@ -41,7 +40,6 @@
 //   async removeDriverSocket(driverId: number): Promise<void> {
 //     await this.gatewayDriverRepository.delete({ driverId });
 //   }
-
 
 //   async addCustomerSocket(customerId: number, socketId: string): Promise<SocketCustomer> {
 //     const existingSocket = await this.gatewayCustomerRepository.findOne({ where: { customerId } });

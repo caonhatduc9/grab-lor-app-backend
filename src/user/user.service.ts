@@ -23,7 +23,7 @@ export class UserService {
     @Inject('LOCATION_REPOSITORY')
     private locationRepository: Repository<Location>,
     private readonly uploadImageService: UploadImageService,
-  ) { }
+  ) {}
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
@@ -54,7 +54,8 @@ export class UserService {
   }
 
   async getUserCustomerById(customerId: number): Promise<any> {
-    const result = await this.userRepository.createQueryBuilder('user')
+    const result = await this.userRepository
+      .createQueryBuilder('user')
       .leftJoinAndSelect('user.customer', 'customer')
       .where('customer.customerId = :customerId', { customerId })
       .getOne();
@@ -106,13 +107,15 @@ export class UserService {
   }
 
   async getDrivers(): Promise<Driver[]> {
-    const drivers = await this.driverRepository.createQueryBuilder('driver')
+    const drivers = await this.driverRepository
+      .createQueryBuilder('driver')
       .leftJoinAndSelect('driver.location2', 'location')
       .getMany();
     return drivers;
   }
   async getDriversOnline(): Promise<Driver[]> {
-    const drivers = await this.driverRepository.createQueryBuilder('driver')
+    const drivers = await this.driverRepository
+      .createQueryBuilder('driver')
       .leftJoinAndSelect('driver.location2', 'location')
       .where('driver.status = :status', { status: 'online' })
       .getMany();
@@ -122,7 +125,10 @@ export class UserService {
     const driver = await this.driverRepository.findOne({ where: { driverId } });
     return driver;
   }
-  async updateLocationDriver(driverId: number, location: { lat: number, lon: number }): Promise<any> {
+  async updateLocationDriver(
+    driverId: number,
+    location: { lat: number; lon: number },
+  ): Promise<any> {
     const driver = await this.driverRepository.findOne({ where: { driverId } });
     if (!driver) {
       throw new NotFoundException(`Driver with id ${driverId} not found`);
@@ -132,7 +138,7 @@ export class UserService {
     updateLocation.locationId = driver.location;
     updateLocation.lat = location.lat.toString();
     updateLocation.lon = location.lon.toString();
-    console.log("ago to update location");
+    console.log('ago to update location');
     return await this.locationRepository.save(updateLocation);
   }
 }

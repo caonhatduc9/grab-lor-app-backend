@@ -7,7 +7,11 @@ import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [DatabaseModule, UserModule],
-  providers: [GatewayBookingGateway, GatewayBookingService, ...GatewayBookingProviders],
-  exports: [GatewayBookingService, GatewayBookingGateway]
+  providers: [
+    GatewayBookingGateway,
+    GatewayBookingService,
+    ...GatewayBookingProviders,
+  ],
+  exports: [GatewayBookingService, GatewayBookingGateway],
 })
-export class GatewayBookingModule { }
+export class GatewayBookingModule {}

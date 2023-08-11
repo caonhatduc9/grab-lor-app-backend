@@ -1,4 +1,4 @@
 export interface PricingRespone {
-    motorbikeCost: number;
-    carCost: number;
+  motorbikeCost: number;
+  carCost: number;
 }

@@ -24,7 +24,22 @@ export interface PricingStep {
 }
 
 export const pricingConfig: PricingStep[] = [
-  { kmStart: STEP_ONE_START, kmEnd: STEP_ONE_END, pricePerKmCar: STEP_ONE_PRICE_CAR, pricePerKmMotorbike: STEP_ONE_PRICE_MOTORBIKE },
-  { kmStart: STEP_TWO_START, kmEnd: STEP_TWO_END, pricePerKmCar: STEP_TWO_PRICE_CAR, pricePerKmMotorbike: STEP_TWO_PRICE_MOTORBIKE },
-  { kmStart: STEP_THREE_START, kmEnd: STEP_THREE_END, pricePerKmCar: STEP_THREE_PRICE_CAR, pricePerKmMotorbike: STEP_THREE_PRICE_MOTORBIKE },
+  {
+    kmStart: STEP_ONE_START,
+    kmEnd: STEP_ONE_END,
+    pricePerKmCar: STEP_ONE_PRICE_CAR,
+    pricePerKmMotorbike: STEP_ONE_PRICE_MOTORBIKE,
+  },
+  {
+    kmStart: STEP_TWO_START,
+    kmEnd: STEP_TWO_END,
+    pricePerKmCar: STEP_TWO_PRICE_CAR,
+    pricePerKmMotorbike: STEP_TWO_PRICE_MOTORBIKE,
+  },
+  {
+    kmStart: STEP_THREE_START,
+    kmEnd: STEP_THREE_END,
+    pricePerKmCar: STEP_THREE_PRICE_CAR,
+    pricePerKmMotorbike: STEP_THREE_PRICE_MOTORBIKE,
+  },
 ];

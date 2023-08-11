@@ -10,4 +10,4 @@ import { GatewayBookingModule } from '../gateway-booking/gateway-booking.module'
   controllers: [BookingController],
   providers: [BookingService, PricingStrategyFactory],
 })
-export class BookingModule { }
+export class BookingModule {}

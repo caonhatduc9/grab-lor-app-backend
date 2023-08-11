@@ -9,7 +9,7 @@ import { ShareProviders } from './share.providers';
 import { DatabaseModule } from 'src/database/database.module';
 import { GoogleMapsService } from './googleMap.service';
 
-@Global() 
+@Global()
 @Module({
   imports: [DatabaseModule],
   providers: [...ShareProviders, GoogleMapsService],

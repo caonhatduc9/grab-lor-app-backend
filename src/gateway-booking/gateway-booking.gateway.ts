@@ -1,4 +1,9 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  MessageBody,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { GatewayBookingService } from './gateway-booking.service';
 // import { CreateGatewayDriverDto } from './dto/create-gateway-driver.dto';
 // import { UpdateGatewayDriverDto } from './dto/update-gateway-driver.dto';
@@ -9,7 +14,7 @@ import { async } from 'rxjs';
 @Injectable()
 @WebSocketGateway()
 export class GatewayBookingGateway {
-  constructor(private readonly gatewayDriverService: GatewayBookingService) { }
+  constructor(private readonly gatewayDriverService: GatewayBookingService) {}
 
   @WebSocketServer() server: Server;
   handleConnection(client: Socket) {
@@ -18,7 +23,7 @@ export class GatewayBookingGateway {
       const driverId = client.handshake.query.driverId as string;
       console.log(client.handshake.query); // Lấy thông tin từ query string
       if (driverId) {
-        console.log("====driver", client.id);
+        console.log('====driver', client.id);
         this.gatewayDriverService.addDriverSocket(+driverId, client.id);
       }
       console.log('Client connected: ' + client.id);
@@ -26,7 +31,7 @@ export class GatewayBookingGateway {
     }
     if (client.handshake.query.customerId) {
       const customerId = client.handshake.query.customerId as string;
-      console.log("====customer", client.id);
+      console.log('====customer', client.id);
       this.gatewayDriverService.addCustomerSocket(+customerId, client.id);
     }
   }
@@ -56,23 +61,31 @@ export class GatewayBookingGateway {
 
   @SubscribeMessage('updateLocationDriver')
   async handleUpdateLocationDriver(client: Socket, payload: any) {
-    console.log("====updateLocation", payload);
+    console.log('====updateLocation', payload);
     const driverId = client.handshake.query.driverId as string;
-    const res = await this.gatewayDriverService.updateLocationDriver(+driverId, payload);
-    console.log("====updateLocation", res);
+    const res = await this.gatewayDriverService.updateLocationDriver(
+      +driverId,
+      payload,
+    );
+    console.log('====updateLocation', res);
     this.server.emit('updateLocationDriver', res);
   }
 
   async sendRideRequestToDriver(driverId: string, payload: any) {
-    const socket = await this.gatewayDriverService.getDriverSocketById(+driverId);
+    const socket = await this.gatewayDriverService.getDriverSocketById(
+      +driverId,
+    );
     const socketId = socket.socketId;
     if (socketId) {
-      console.log("===CHECK===", socket.socketId);
+      console.log('===CHECK===', socket.socketId);
       this.server.to(socket.socketId).emit('rideRequest', payload);
     }
   }
   async sendDriverInfoToCustomer(driverInfo: any) {
-    const customerSocket = await this.gatewayDriverService.getCustomerSocketById(driverInfo.customerSocketId);
+    const customerSocket =
+      await this.gatewayDriverService.getCustomerSocketById(
+        driverInfo.customerSocketId,
+      );
     if (customerSocket.socketId) {
       this.server.to(customerSocket.socketId).emit('driverInfo', driverInfo);
     }
