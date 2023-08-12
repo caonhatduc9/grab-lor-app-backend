@@ -45,6 +45,14 @@ export class Driver {
   @Column('int', { name: 'vehicle' })
   vehicle: number;
 
+  @Column("enum", {
+    name: "status",
+    nullable: true,
+    enum: ["offline", "online", "driving"],
+    default: () => "offline",
+  })
+  status: "offline" | "online" | "driving" | null;
+
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];
 

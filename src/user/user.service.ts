@@ -10,6 +10,7 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 import { UploadImageService } from 'src/upload-image/upload-image.service';
 import { Driver } from 'src/entities/driver.entity';
 import { Location } from 'src/entities/location.entity';
+import { DriverStatus } from './user.constan';
 @Injectable()
 export class UserService {
   constructor(
@@ -140,5 +141,14 @@ export class UserService {
     updateLocation.lon = location.lon.toString();
     console.log('ago to update location');
     return await this.locationRepository.save(updateLocation);
+  }
+
+  async updateStatusDriver(driverId: number, status: string): Promise<any> {
+    const driver = await this.driverRepository.findOne({ where: { driverId } });
+    if (!driver) {
+      throw new NotFoundException(`Driver with id ${driverId} not found`);
+    }
+    driver.status = status as DriverStatus;
+    return await this.driverRepository.save(driver);
   }
 }

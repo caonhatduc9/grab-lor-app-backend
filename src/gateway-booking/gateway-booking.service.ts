@@ -96,6 +96,10 @@ export class GatewayBookingService {
 
   async findNearestDriverOnline(payload: any): Promise<any> {
     const drivers = await this.userService.getDriversOnline();
+    if (drivers.length === 0) return {
+      statusCode: 404,
+      message: 'No available driver found',
+    };
     try {
       const nearestDriver = await this.googleMapService.findNearestDriver(
         payload.pickup,

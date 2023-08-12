@@ -8,6 +8,7 @@ import { GatewayBookingService } from './gateway-booking.service';
 import { Server, Socket } from 'socket.io';
 import { Injectable } from '@nestjs/common';
 import { BookingService } from '../booking/booking.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 @WebSocketGateway()
@@ -16,6 +17,7 @@ export class GatewayBookingGateway {
   constructor(
     private readonly gatewayBookingService: GatewayBookingService,
     private readonly bookingService: BookingService,
+    private readonly userServide: UserService,
   ) {
     this.driverResponses = new Map<string, any>();
   }
@@ -86,6 +88,13 @@ export class GatewayBookingGateway {
       try {
         // find nearest driverSocket
         const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(payload);
+        if (nearestDriver.statusCode === 404) {
+          this.sendDriverInfoToCustomer({
+            statusCode: 404,
+            message: 'all driver not available please try again later',
+          });
+          return;
+        }
         const driverSocket = await this.gatewayBookingService.getDriverSocketById(
           nearestDriver.driverId,
         );
@@ -110,7 +119,8 @@ export class GatewayBookingGateway {
           const driverResponse = await driverResponsePromise;
 
           console.log("====driverResponses", driverResponse, this.driverResponses.get(driverSocket.socketId));
-          if (this.driverResponses.get(driverSocket.socketId)) {
+          if (this.driverResponses.get(driverSocket.socketId) === 'accept') {
+            this.userServide.updateStatusDriver(+nearestDriver.driverId, 'driving');
             this.driverResponses.delete(driverSocket.socketId);
             this.sendDriverInfoToCustomer({
               statusCode: 200,
