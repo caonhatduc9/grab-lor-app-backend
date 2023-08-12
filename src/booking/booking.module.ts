@@ -6,8 +6,9 @@ import { UserModule } from 'src/user/user.module';
 import { GatewayBookingModule } from '../gateway-booking/gateway-booking.module';
 
 @Module({
-  imports: [UserModule, GatewayBookingModule],
+  imports: [UserModule],
   controllers: [BookingController],
   providers: [BookingService, PricingStrategyFactory],
+  exports: [BookingService],
 })
 export class BookingModule {}

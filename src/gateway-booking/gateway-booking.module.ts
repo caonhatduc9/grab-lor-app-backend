@@ -4,14 +4,16 @@ import { GatewayBookingGateway } from './gateway-booking.gateway';
 import { GatewayBookingProviders } from './providers/gateway-booking.provider';
 import { DatabaseModule } from 'src/database/database.module';
 import { UserModule } from 'src/user/user.module';
+import { BookingModule } from '../booking/booking.module';
+import { SharedModule } from '../shareModule/share.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule],
+  imports: [DatabaseModule, UserModule, BookingModule, SharedModule],
   providers: [
     GatewayBookingGateway,
     GatewayBookingService,
     ...GatewayBookingProviders,
   ],
-  exports: [GatewayBookingService, GatewayBookingGateway],
+  exports: [GatewayBookingService],
 })
 export class GatewayBookingModule {}

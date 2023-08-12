@@ -7,7 +7,8 @@ import { WebSocketServer } from '@nestjs/websockets';
 import { SocketDriver } from 'src/entities/socketDriver.entity';
 import { UserService } from 'src/user/user.service';
 import { SocketCustomer } from 'src/entities/socketCustomer.entity';
-import { async } from 'rxjs';
+import { GoogleMapsService } from '../shareModule/googleMap.service';
+import { BookingService } from '../booking/booking.service';
 
 @Injectable()
 export class GatewayBookingService {
@@ -16,9 +17,11 @@ export class GatewayBookingService {
     @Inject('SOCKET_DRIVER_REPOSITORY')
     private gatewayDriverRepository: Repository<SocketDriver>,
     @Inject('SOCKET_CUSTOMER_REPOSITORY')
-    private gatewayCustomerRepository: Repository<SocketCustomer>, // private userService: UserService
-    private userService: UserService,
-  ) {}
+    private readonly gatewayCustomerRepository: Repository<SocketCustomer>, // private userService: UserService
+    private readonly userService: UserService,
+    private googleMapService: GoogleMapsService,
+    private readonly bookingService: BookingService,
+  ) { }
 
   async addDriverSocket(
     driverId: number,
@@ -90,4 +93,62 @@ export class GatewayBookingService {
   async updateLocationDriver(driverId: number, location: any): Promise<any> {
     return await this.userService.updateLocationDriver(driverId, location);
   }
+
+  async findNearestDriverOnline(payload: any): Promise<any> {
+    const drivers = await this.userService.getDriversOnline();
+    try {
+      const nearestDriver = await this.googleMapService.findNearestDriver(
+        payload.pickup,
+        drivers,
+      );
+      return nearestDriver;
+    }
+    catch (err) {
+      return {
+        statusCode: 404,
+        message: 'No available driver found',
+      };
+    }
+  }
+
+
+  // async createBooking(body: any): Promise<any> {
+  //   const { pickup, destination, vehicleType, paymentMethod } = body;
+  //   const drivers = await this.userService.getDriversOnline();
+  //   const customer = await this.bookingService.getInforCustomer(+body.customerId);
+  //   try {
+  //     // find nearest driver
+  //     const nearestDriver = await this.googleMapService.findNearestDriver(
+  //       body.pickup,
+  //       drivers,
+  //     );
+  //     // console.log("nearestDriver", nearestDriver);
+  //     const driverSocket = await this.getDriverSocketById(
+  //       nearestDriver.driverId,
+  //     );
+  //     //send request book to the driver
+  //     if (driverSocket) {
+  //       this.sendRideRequestToDriver(
+  //         nearestDriver.driverId,
+  //         { customer, pickup, destination, vehicleType, paymentMethod },
+  //       );
+  //       return {
+  //         statusCode: 200,
+  //         message: 'Ride requested',
+  //         nearestDriver: nearestDriver,
+  //       };
+  //     } else {
+  //       return {
+  //         statusCode: 404,
+  //         message: 'Driver not available',
+  //       };
+  //     }
+  //   } catch (error) {
+  //     return {
+  //       statusCode: 404,
+  //       message: 'No available driver found',
+  //     };
+  //   }
+  // }
+
 }

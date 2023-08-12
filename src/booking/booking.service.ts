@@ -16,8 +16,8 @@ export class BookingService {
     pricingStrategyFactory: PricingStrategyFactory,
     private userService: UserService,
     private googleMapService: GoogleMapsService,
-    private gatewayBookingService: GatewayBookingService,
-    private gatewayBookingGateway: GatewayBookingGateway,
+    // private gatewayBookingService: GatewayBookingService,
+    // private gatewayBookingGateway: GatewayBookingGateway,
   ) {
     this.pricingStrategyFactory = pricingStrategyFactory;
   }
@@ -35,9 +35,10 @@ export class BookingService {
   }
 
   async getInforCustomer(customerId: number): Promise<any> {
+    console.log('customerId', customerId);
     const customer = await this.userService.getUserCustomerById(customerId);
     delete customer.password;
-    delete customer.role;
+    delete customer.roleId;
     delete customer.authProvider;
     delete customer.customer;
     delete customer.isActive;
@@ -45,42 +46,42 @@ export class BookingService {
     return customer;
   }
 
-  async createBooking(body: any): Promise<any> {
-    const { pickup, destination, vehicleType, paymentMethod } = body;
-    const drivers = await this.userService.getDriversOnline();
-    const customer = await this.getInforCustomer(+body.customerId);
-    try {
-      // find nearest driver
-      const nearestDriver = await this.googleMapService.findNearestDriver(
-        body.pickup,
-        drivers,
-      );
-      // console.log("nearestDriver", nearestDriver);
-      const driverSocket = await this.gatewayBookingService.getDriverSocketById(
-        nearestDriver.driverId,
-      );
-      //send request book to the driver
-      if (driverSocket) {
-        this.gatewayBookingGateway.sendRideRequestToDriver(
-          nearestDriver.driverId,
-          { customer, pickup, destination, vehicleType, paymentMethod },
-        );
-        return {
-          statusCode: 200,
-          message: 'Ride requested',
-          nearestDriver: nearestDriver,
-        };
-      } else {
-        return {
-          statusCode: 404,
-          message: 'Driver not available',
-        };
-      }
-    } catch (error) {
-      return {
-        statusCode: 404,
-        message: 'No available driver found',
-      };
-    }
-  }
+  // async createBooking(body: any): Promise<any> {
+  //   const { pickup, destination, vehicleType, paymentMethod } = body;
+  //   const drivers = await this.userService.getDriversOnline();
+  //   const customer = await this.getInforCustomer(+body.customerId);
+  //   try {
+  //     // find nearest driver
+  //     const nearestDriver = await this.googleMapService.findNearestDriver(
+  //       body.pickup,
+  //       drivers,
+  //     );
+  //     // console.log("nearestDriver", nearestDriver);
+  //     const driverSocket = await this.gatewayBookingService.getDriverSocketById(
+  //       nearestDriver.driverId,
+  //     );
+  //     //send request book to the driver
+  //     if (driverSocket) {
+  //       this.gatewayBookingGateway.sendRideRequestToDriver(
+  //         nearestDriver.driverId,
+  //         { customer, pickup, destination, vehicleType, paymentMethod },
+  //       );
+  //       return {
+  //         statusCode: 200,
+  //         message: 'Ride requested',
+  //         nearestDriver: nearestDriver,
+  //       };
+  //     } else {
+  //       return {
+  //         statusCode: 404,
+  //         message: 'Driver not available',
+  //       };
+  //     }
+  //   } catch (error) {
+  //     return {
+  //       statusCode: 404,
+  //       message: 'No available driver found',
+  //     };
+  //   }
+  // }
 }

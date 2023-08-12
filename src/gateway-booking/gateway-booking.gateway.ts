@@ -5,16 +5,20 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { GatewayBookingService } from './gateway-booking.service';
-// import { CreateGatewayDriverDto } from './dto/create-gateway-driver.dto';
-// import { UpdateGatewayDriverDto } from './dto/update-gateway-driver.dto';
 import { Server, Socket } from 'socket.io';
 import { Injectable } from '@nestjs/common';
-import { async } from 'rxjs';
+import { BookingService } from '../booking/booking.service';
 
 @Injectable()
 @WebSocketGateway()
 export class GatewayBookingGateway {
-  constructor(private readonly gatewayDriverService: GatewayBookingService) {}
+  private driverResponses: Map<string, any>;
+  constructor(
+    private readonly gatewayBookingService: GatewayBookingService,
+    private readonly bookingService: BookingService,
+  ) {
+    this.driverResponses = new Map<string, any>();
+  }
 
   @WebSocketServer() server: Server;
   handleConnection(client: Socket) {
@@ -24,7 +28,7 @@ export class GatewayBookingGateway {
       console.log(client.handshake.query); // Lấy thông tin từ query string
       if (driverId) {
         console.log('====driver', client.id);
-        this.gatewayDriverService.addDriverSocket(+driverId, client.id);
+        this.gatewayBookingService.addDriverSocket(+driverId, client.id);
       }
       console.log('Client connected: ' + client.id);
       // this.gatewayDriverService.getDriverSocketById(2)
@@ -32,7 +36,7 @@ export class GatewayBookingGateway {
     if (client.handshake.query.customerId) {
       const customerId = client.handshake.query.customerId as string;
       console.log('====customer', client.id);
-      this.gatewayDriverService.addCustomerSocket(+customerId, client.id);
+      this.gatewayBookingService.addCustomerSocket(+customerId, client.id);
     }
   }
 
@@ -41,29 +45,21 @@ export class GatewayBookingGateway {
     if (client.handshake.query.driverId) {
       const driverId = client.handshake.query.driverId as string;
       if (driverId) {
-        this.gatewayDriverService.removeDriverSocket(+driverId);
+        this.gatewayBookingService.removeDriverSocket(+driverId);
       }
     }
     if (client.handshake.query.customerId) {
       const customerId = client.handshake.query.customerId as string;
-      this.gatewayDriverService.removeCustomerSocket(+customerId);
+      this.gatewayBookingService.removeCustomerSocket(+customerId);
     }
   }
 
-  @SubscribeMessage('rideResponse')
-  handleRideResponse(client: Socket, payload: any) {
-    // Forward phản hồi từ tài xế tới phía client (app customer)
-    this.server.to(payload.customerSocketId).emit('rideResponse', {
-      statusCode: payload.accepted ? 200 : 200, // Tùy tình huống, bạn có thể đổi statusCode tại đây
-      message: payload.accepted ? 'Driver accepted' : 'Driver declined',
-    });
-  }
 
   @SubscribeMessage('updateLocationDriver')
   async handleUpdateLocationDriver(client: Socket, payload: any) {
     console.log('====updateLocation', payload);
     const driverId = client.handshake.query.driverId as string;
-    const res = await this.gatewayDriverService.updateLocationDriver(
+    const res = await this.gatewayBookingService.updateLocationDriver(
       +driverId,
       payload,
     );
@@ -71,8 +67,75 @@ export class GatewayBookingGateway {
     this.server.emit('updateLocationDriver', res);
   }
 
+  @SubscribeMessage('driverResponse')
+  handleDriverResponse(client: Socket, payload: any) {
+    const driverId = client.id; // Thay thế bằng trường dữ liệu chứa ID của tài xế
+    this.driverResponses.set(client.id, payload.status);
+    console.log("map", this.driverResponses);
+    this.server.emit('driverResponse', {
+      statusCode: 200,
+      message: 'accepted',
+    });
+  }
+
+  @SubscribeMessage('createBooking')
+  async handleCreateBooking(client: Socket, payload: any) {
+    try {
+      const { pickup, destination, vehicleType, paymentMethod } = payload;
+      const customer = await this.bookingService.getInforCustomer(+payload.customerId);
+      try {
+        // find nearest driverSocket
+        const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(payload);
+        const driverSocket = await this.gatewayBookingService.getDriverSocketById(
+          nearestDriver.driverId,
+        );
+        console.log('driverSocket', driverSocket);
+
+        //send request book to the driver
+        const driverResponsePromise = new Promise((resolve) => {
+          this.sendRideRequestToDriver(
+            nearestDriver.driverId,
+            { customer, pickup, destination, vehicleType, paymentMethod },
+          );
+          const interval = setInterval(() => {
+            if (this.driverResponses.has(driverSocket.socketId)) {
+              clearInterval(interval);
+              resolve(this.driverResponses.get(driverSocket.socketId));
+            }
+          }, 1000);
+        });
+
+        if (driverSocket) {
+          console.log("====driverSocket", driverSocket);
+          const driverResponse = await driverResponsePromise;
+
+          console.log("====driverResponses", driverResponse, this.driverResponses.get(driverSocket.socketId));
+          if (this.driverResponses.get(driverSocket.socketId)) {
+            this.driverResponses.delete(driverSocket.socketId);
+            this.sendDriverInfoToCustomer({
+              statusCode: 200,
+              message: 'accepted',
+              driverInfo: nearestDriver,
+            });
+          }
+        } else {
+          this.sendDriverInfoToCustomer({ message: 'Driver not available' });
+        }
+      } catch (error) {
+        this.sendDriverInfoToCustomer({
+          statusCode: 404,
+          message: 'No available driver found',
+        });
+      }
+    } catch (error) {
+      this.sendDriverInfoToCustomer({
+        statusCode: 500,
+        message: 'Error requesting ride',
+      });
+    }
+  }
   async sendRideRequestToDriver(driverId: string, payload: any) {
-    const socket = await this.gatewayDriverService.getDriverSocketById(
+    const socket = await this.gatewayBookingService.getDriverSocketById(
       +driverId,
     );
     const socketId = socket.socketId;
@@ -83,7 +146,7 @@ export class GatewayBookingGateway {
   }
   async sendDriverInfoToCustomer(driverInfo: any) {
     const customerSocket =
-      await this.gatewayDriverService.getCustomerSocketById(
+      await this.gatewayBookingService.getCustomerSocketById(
         driverInfo.customerSocketId,
       );
     if (customerSocket.socketId) {
