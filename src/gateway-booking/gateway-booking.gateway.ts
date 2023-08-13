@@ -91,7 +91,7 @@ export class GatewayBookingGateway {
   @SubscribeMessage('createBooking')
   async handleCreateBooking(client: Socket, payload: any) {
     try {
-      const { pickup, destination, vehicleType, paymentMethod } = payload;
+      const { pickup, destination, vehicleType, price, paymentMethod } = payload;
       const customer = await this.bookingService.getInforCustomer(+payload.customerId);
       try {
         // find nearest driverSocket
@@ -112,7 +112,7 @@ export class GatewayBookingGateway {
         const driverResponsePromise = new Promise((resolve) => {
           this.sendRideRequestToDriver(
             nearestDriver.driverId,
-            { customer, pickup, destination, vehicleType, paymentMethod },
+            { customer, pickup, destination, vehicleType,price, paymentMethod },
           );
           const interval = setInterval(() => {
             if (this.driverResponses.has(driverSocket.socketId)) {
