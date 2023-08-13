@@ -32,7 +32,7 @@ export class GoogleMapsService {
     });
     // console.log("response: " + JSON.stringify(response));
     const distances = response.json.rows[0].elements;
-    console.log('distances', distances);
+    // console.log('distances', distances);
     let minDistance = Infinity;
     let nearestDriverIndex = -1;
 
@@ -44,7 +44,7 @@ export class GoogleMapsService {
     });
 
     if (nearestDriverIndex !== -1) {
-      console.log('drivers[nearestDriverIndex]', drivers[nearestDriverIndex]);
+      // console.log('drivers[nearestDriverIndex]', drivers[nearestDriverIndex]);
       return drivers[nearestDriverIndex];
     } else {
       throw new Error('No driver found.');

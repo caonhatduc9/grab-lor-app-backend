@@ -35,7 +35,7 @@ export class BookingService {
   }
 
   async getInforCustomer(customerId: number): Promise<any> {
-    console.log('customerId', customerId);
+    // console.log('customerId', customerId);
     const customer = await this.userService.getUserCustomerById(customerId);
     delete customer.password;
     delete customer.roleId;

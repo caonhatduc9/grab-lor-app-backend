@@ -4,10 +4,12 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Driver } from './driver.entity';
 import { Customer } from './customer.entity';
+import { SocketDriverCustomer } from './socketDriverCustomer.entity';
 
 // @Index("socket_customer_FK", ["customer_Id"], {})
 @Entity('socket_customer', { schema: 'grab_lor' })
@@ -27,4 +29,9 @@ export class SocketCustomer {
   })
   @JoinColumn([{ name: 'customer_id', referencedColumnName: 'customerId' }])
   customer: Customer;
+  @OneToMany(
+    () => SocketDriverCustomer,
+    (socketDriverCustomer) => socketDriverCustomer.socketDriver
+  )
+  socketDriverCustomers: SocketDriverCustomer[];
 }

@@ -44,7 +44,7 @@ export class GatewayBookingService {
   }
 
   async getDriverSocketById(driverId: number): Promise<SocketDriver> {
-    console.log('driverId', driverId);
+    // console.log('driverId', driverId);
     const socket = await this.gatewayDriverRepository.findOne({
       where: { driverId },
     });

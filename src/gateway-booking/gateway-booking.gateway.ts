@@ -51,6 +51,7 @@ export class GatewayBookingGateway {
       const driverId = client.handshake.query.driverId as string;
       if (driverId) {
         this.gatewayBookingService.removeDriverSocket(+driverId);
+        this.userServide.updateStatusDriver(+driverId, 'offline');
       }
     }
     if (client.handshake.query.customerId) {
@@ -66,12 +67,12 @@ export class GatewayBookingGateway {
     const driverId = client.handshake.query.driverId as string;
     const res = await this.gatewayBookingService.updateLocationDriver(
       +driverId,
-      payload,
+      payload.location,
     );
 
     console.log('====updateLocation', res);
-    const driverSocket = await this.gatewayBookingService.getDriverSocketById(+driverId);
-    this.server.to(driverSocket.socketId).emit('updateLocationDriver', res);
+    const customerSocket = await this.gatewayBookingService.getCustomerSocketById(+payload.customerId);
+    this.server.to(customerSocket.socketId).emit('updateLocationDriver', res);
     return res;
   }
 
@@ -91,13 +92,15 @@ export class GatewayBookingGateway {
   @SubscribeMessage('createBooking')
   async handleCreateBooking(client: Socket, payload: any) {
     try {
+      const customerId = client.handshake.query.customerId as string;
+      // console.log("CAO NHAT DUC", client.handshake.query.customerId);
       const { pickup, destination, vehicleType, price, paymentMethod } = payload;
-      const customer = await this.bookingService.getInforCustomer(+payload.customerId);
+      const customer = await this.bookingService.getInforCustomer(+customerId);
       try {
         // find nearest driverSocket
         const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(payload);
         if (nearestDriver.statusCode === 404) {
-          this.sendDriverInfoToCustomer(payload.customerId, {
+          this.sendDriverInfoToCustomer(+customerId, {
             statusCode: 404,
             message: 'all driver not available please try again later',
           });
@@ -106,13 +109,13 @@ export class GatewayBookingGateway {
         const driverSocket = await this.gatewayBookingService.getDriverSocketById(
           nearestDriver.driverId,
         );
-        console.log('driverSocket', driverSocket);
+        console.log('driverSocket');
 
         //send request book to the driver
         const driverResponsePromise = new Promise((resolve) => {
           this.sendRideRequestToDriver(
             nearestDriver.driverId,
-            { customer, pickup, destination, vehicleType,price, paymentMethod },
+            { customer, pickup, destination, vehicleType, price, paymentMethod },
           );
           const interval = setInterval(() => {
             if (this.driverResponses.has(driverSocket.socketId)) {
@@ -126,21 +129,22 @@ export class GatewayBookingGateway {
           console.log("====driverSocket", driverSocket);
           const driverResponse = await driverResponsePromise;
 
-          console.log("====driverResponses", driverResponse, this.driverResponses.get(driverSocket.socketId));
+          // console.log("====driverResponses", driverResponse, this.driverResponses.get(driverSocket.socketId));
           if (this.driverResponses.get(driverSocket.socketId) === 'accept') {
+            // const driverSocket
             this.userServide.updateStatusDriver(+nearestDriver.driverId, 'driving');
             this.driverResponses.delete(driverSocket.socketId);
-            this.sendDriverInfoToCustomer(payload.customerId, {
+            this.sendDriverInfoToCustomer(+customerId, {
               statusCode: 200,
               message: 'accepted',
               driverInfo: nearestDriver,
             });
           }
         } else {
-          this.sendDriverInfoToCustomer(payload.customerId, { message: 'Driver not available' });
+          this.sendDriverInfoToCustomer(+customerId, { message: 'Driver not available' });
         }
       } catch (error) {
-        this.sendDriverInfoToCustomer(payload.customerId, {
+        this.sendDriverInfoToCustomer(+customerId, {
           statusCode: 404,
           message: 'No available driver found',
         });
@@ -158,11 +162,11 @@ export class GatewayBookingGateway {
     );
     const socketId = socket.socketId;
     if (socketId) {
-      console.log('===CHECK===', socket.socketId);
+      // console.log('===CHECK===', socket.socketId);
       this.server.to(socket.socketId).emit('rideRequest', payload);
     }
   }
-  async sendDriverInfoToCustomer(customerId, payload: any) {
+  async sendDriverInfoToCustomer(customerId: number, payload: any) {
     const customerSocket =
       await this.gatewayBookingService.getCustomerSocketById(
         customerId
