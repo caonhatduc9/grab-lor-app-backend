@@ -10,6 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { BookingService } from '../booking/booking.service';
 import { UserService } from '../user/user.service';
 import { async } from 'rxjs';
+import { UpdateLocationDto } from './dto/updateLocation.dto';
 
 @Injectable()
 @WebSocketGateway()
@@ -60,23 +61,27 @@ export class GatewayBookingGateway {
 
 
   @SubscribeMessage('updateLocationDriver')
-  async handleUpdateLocationDriver(client: Socket, payload: any) {
-    console.log('====updateLocation', payload);
+  async handleUpdateLocationDriver(client: Socket, payload: UpdateLocationDto) {
+    console.log('====updateLocation1', payload, "driverId::", client.handshake.query.driverId, "client.id::", client.id);
     const driverId = client.handshake.query.driverId as string;
     const res = await this.gatewayBookingService.updateLocationDriver(
       +driverId,
       payload,
     );
+
     console.log('====updateLocation', res);
-    this.server.emit('updateLocationDriver', res);
+    const driverSocket = await this.gatewayBookingService.getDriverSocketById(+driverId);
+    this.server.to(driverSocket.socketId).emit('updateLocationDriver', res);
+    return res;
   }
 
   @SubscribeMessage('driverResponse')
   async handleDriverResponse(client: Socket, payload: any) {
-    const driverId = client.id;
+    const driverId = client.handshake.query.driverId as string;
     this.driverResponses.set(client.id, payload.status);
     console.log("map", this.driverResponses.entries());
     const driverSocket = await this.gatewayBookingService.getDriverSocketById(+driverId);
+    console.log("ceheck", driverSocket.socketId);
     this.server.to(driverSocket.socketId).emit('driverResponse', {
       statusCode: 200,
       message: 'accepted',

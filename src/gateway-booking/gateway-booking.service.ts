@@ -44,6 +44,7 @@ export class GatewayBookingService {
   }
 
   async getDriverSocketById(driverId: number): Promise<SocketDriver> {
+    console.log('driverId', driverId);
     const socket = await this.gatewayDriverRepository.findOne({
       where: { driverId },
     });
@@ -91,7 +92,18 @@ export class GatewayBookingService {
   //   }
   // }
   async updateLocationDriver(driverId: number, location: any): Promise<any> {
-    return await this.userService.updateLocationDriver(driverId, location);
+    const res = await this.userService.updateLocationDriver(driverId, location);
+    if (res) {
+      return {
+        statusCode: 200,
+        message: 'Update location successfully',
+        currentLocation: res,
+      };
+    }
+    return {
+      statusCode: 500,
+      message: 'Update location failed',
+    };
   }
 
   async findNearestDriverOnline(payload: any): Promise<any> {

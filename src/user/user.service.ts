@@ -24,7 +24,7 @@ export class UserService {
     @Inject('LOCATION_REPOSITORY')
     private locationRepository: Repository<Location>,
     private readonly uploadImageService: UploadImageService,
-  ) {}
+  ) { }
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
@@ -128,17 +128,19 @@ export class UserService {
   }
   async updateLocationDriver(
     driverId: number,
-    location: { lat: number; lon: number },
+    location: { lat: string; lon: string },
   ): Promise<any> {
+    console.log("check location in file usser.Service;;133");
     const driver = await this.driverRepository.findOne({ where: { driverId } });
     if (!driver) {
       throw new NotFoundException(`Driver with id ${driverId} not found`);
     }
 
     const updateLocation = new Location();
+    console.log('driver.location', location.lat, location.lon);
     updateLocation.locationId = driver.location;
-    updateLocation.lat = location.lat.toString();
-    updateLocation.lon = location.lon.toString();
+    updateLocation.lat = location.lat;
+    updateLocation.lon = location.lon;
     console.log('ago to update location');
     return await this.locationRepository.save(updateLocation);
   }
