@@ -115,7 +115,7 @@ export class GatewayBookingGateway {
         const driverResponsePromise = new Promise((resolve) => {
           this.sendRideRequestToDriver(
             nearestDriver.driverId,
-            { customer, pickup, destination, vehicleType, price, paymentMethod },
+            { customer, pickup, destination, vehicleType, price, paymentMethod, customerId },
           );
           const interval = setInterval(() => {
             if (this.driverResponses.has(driverSocket.socketId)) {
