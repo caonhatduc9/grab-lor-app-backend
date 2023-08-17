@@ -5,5 +5,7 @@ export class UserSignupDto {
   @IsNotEmpty()
   readonly email: string;
   @IsNotEmpty()
+  readonly phoneNumber: string;
+  @IsNotEmpty()
   readonly role: string;
 }

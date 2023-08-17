@@ -18,6 +18,7 @@ import { log } from 'console';
 import { clouddebugger } from 'googleapis/build/src/apis/clouddebugger';
 import { UserService } from 'src/user/user.service';
 import { Customer } from 'src/entities/customer.entity';
+import { Exception } from 'handlebars';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private maillingService: MailingService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, password: string): Promise<any> {
     console.log('check user', email, password);
@@ -67,6 +68,7 @@ export class AuthService {
     const user = new User();
     user.email = userSignupDto.email.toLowerCase();
     user.username = userSignupDto.email.split('@')[0];
+    user.phoneNumber = userSignupDto.phoneNumber;
     const randomPassword = generator.generate({
       length: 8,
       numbers: true,
@@ -102,11 +104,27 @@ export class AuthService {
       // await this.settingService.createDefaultSetting(savedUser.userId);
       const subject = 'Verficiaction Code';
       const content = `<p>this is default password: <b>${randomPassword}</b>. Please change password after login</p>`;
-      this.maillingService.sendMail(user.email, subject, content);
-      return {
-        statusCode: 200,
-        message: 'sign up success',
-      };
+      try {
+        this.maillingService.sendMail(user.email, subject, content);
+        return {
+          statusCode: 200,
+          message: 'sign up success',
+        };
+      }
+      catch (err) {
+        if (foundRole.roleName === Role.CUSTOMER) {
+          await this.userService.deleteCustomer(savedUser.userId);
+        }
+        if (foundRole.roleName === Role.DRIVER) {
+          await this.userService.deleteDriver(savedUser.userId);
+        }
+        await this.userService.deleteUser(savedUser.userId);
+        return {
+          statusCode: 400,
+          message: 'sign up fail',
+        };
+      }
+
     } else {
       throw new InternalServerErrorException();
     }

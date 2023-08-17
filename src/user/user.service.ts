@@ -36,6 +36,16 @@ export class UserService {
     return savedUser;
   }
 
+  async deleteUser(id: number): Promise<any> {
+    return await this.userRepository.delete(id);
+  }
+  async deleteDriver(id: number): Promise<any> {
+    return await this.driverRepository.delete(id);
+  }
+  async deleteCustomer(id: number): Promise<any> {
+    return await this.customerRepository.delete(id);
+  }
+
   async findUserByEmail(email: string): Promise<User> {
     return await this.userRepository.findOne({ where: { email } });
   }
