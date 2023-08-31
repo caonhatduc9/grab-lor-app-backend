@@ -134,6 +134,9 @@ export class GatewayBookingGateway {
             // const driverSocket
             this.userServide.updateStatusDriver(+nearestDriver.driverId, 'driving');
             this.driverResponses.delete(driverSocket.socketId);
+
+            
+
             this.sendDriverInfoToCustomer(+customerId, {
               statusCode: 200,
               message: 'accepted',

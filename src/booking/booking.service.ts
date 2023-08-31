@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
 import { UserService } from 'src/user/user.service';
 import { GoogleMapsService } from 'src/shareModule/googleMap.service';
 import { GatewayBookingService } from '../gateway-booking/gateway-booking.service';
 import { GatewayBookingGateway } from '../gateway-booking/gateway-booking.gateway';
+import { Repository } from 'typeorm';
+import { Booking } from 'src/entities/booking.entity';
+import { Route } from 'src/entities/route.entity';
+import { Location } from 'src/entities/location.entity';
 
 @Injectable()
 export class BookingService {
+
+
   getPrice(distanceInKm: number, vehicleType: string): number {
     throw new Error('Method not implemented.');
   }
@@ -18,6 +24,10 @@ export class BookingService {
     private googleMapService: GoogleMapsService,
     // private gatewayBookingService: GatewayBookingService,
     // private gatewayBookingGateway: GatewayBookingGateway,
+    @Inject('BOOKING_REPOSITORY')
+    private readonly bookingRepository: Repository<Booking>, // private userService: UserService
+    @Inject('ROUTE_REPOSITORY')
+    private readonly routegRepository: Repository<Route>,
   ) {
     this.pricingStrategyFactory = pricingStrategyFactory;
   }
@@ -44,6 +54,30 @@ export class BookingService {
     delete customer.isActive;
     delete customer.avatar;
     return customer;
+  }
+
+
+  async getLocationByPhoneNumber(phoneNumber: string): Promise<any[]> {
+    const bookings = await this.bookingRepository.createQueryBuilder("booking")
+      .leftJoinAndSelect("booking.customer", "customer")
+      .leftJoinAndSelect("customer.user", "user")
+      .leftJoinAndSelect("booking.route", "route")
+      .leftJoinAndSelect("route.endLocation2", "endLocation")
+      // .leftJoinAndSelect("route.endLocation2", "endLocation")
+      .select(["booking.bookingId", "route.routeId", "endLocation"])
+      .where("user.phoneNumber = :phoneNumber", { phoneNumber: phoneNumber })
+      .getMany();
+
+    const location = bookings.map((booking) => {
+      return {
+        // bookingId: booking.bookingId,
+        // routeId: booking.route.routeId,
+        endLocation: booking.route.endLocation2,
+        // endLocation: booking.route.endLocation2,
+      }
+    }
+    )
+    return location;
   }
 
   // async createBooking(body: any): Promise<any> {
