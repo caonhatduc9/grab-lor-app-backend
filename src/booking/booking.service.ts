@@ -63,8 +63,9 @@ export class BookingService {
       .leftJoinAndSelect("customer.user", "user")
       .leftJoinAndSelect("booking.route", "route")
       .leftJoinAndSelect("route.endLocation2", "endLocation")
+      .leftJoinAndSelect("route.startLocation2", "startLocation")
       // .leftJoinAndSelect("route.endLocation2", "endLocation")
-      .select(["booking.bookingId", "route.routeId", "endLocation"])
+      .select(["booking.bookingId", "route.routeId", "startLocation", "endLocation"])
       .where("user.phoneNumber = :phoneNumber", { phoneNumber: phoneNumber })
       .getMany();
 
@@ -72,13 +73,21 @@ export class BookingService {
       return {
         // bookingId: booking.bookingId,
         // routeId: booking.route.routeId,
+        startLocation: booking.route.startLocation2,
         endLocation: booking.route.endLocation2,
-        // endLocation: booking.route.endLocation2,
       }
     }
     )
     return location;
   }
+
+  // async getBookings(): Promise<any[]> {
+  //   const bookings = await this.bookingRepository.createQueryBuilder("booking")
+  //     .leftJoinAndSelect("booking.customer", "customer")
+
+
+  //   // return 0;
+  // }
 
   // async createBooking(body: any): Promise<any> {
   //   const { pickup, destination, vehicleType, paymentMethod } = body;
