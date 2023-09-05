@@ -101,10 +101,26 @@ export class BookingService {
     const savedBookingPosition = this.bookingPositionRepository.save(newBookingPosition);
     return savedBookingPosition;
   }
-  // async getBookings(): Promise<any[]> {
-  //   const bookings = await this.bookingRepository.createQueryBuilder("booking")
-  //     .leftJoinAndSelect("booking.customer", "customer")
 
+  async getBookingPositions(): Promise<any> {
+    const bookingPositions = await this.bookingPositionRepository.find();
+    bookingPositions.forEach((bookingPosition) => {
+      delete bookingPosition.bookingPositionId;
+      const dateTime = new Date(bookingPosition.timeBooking);
+      // Lấy các thành phần của ngày và giờ
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const seconds = dateTime.getSeconds();
+      const day = dateTime.getDate();
+      const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+      const year = dateTime.getFullYear();
+
+      // Định dạng lại thành chuỗi theo yêu cầu
+      const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+      bookingPosition.timeBooking = formattedDateTime;
+    })
+    return bookingPositions;
+  }
 
   //   // return 0;
   // }

@@ -33,6 +33,10 @@ export class BookingController {
   ): Promise<any> {
     return this.bookingService.createBookingPostition(createBookingPostitionDto);
   }
+  @Get('getBookingPositions')
+  async getBookingPositions(): Promise<any> {
+    return this.bookingService.getBookingPositions();
+  }
 
   // @Post('request-ride')
   // async requestRide(@Body() body: any): Promise<any> {
