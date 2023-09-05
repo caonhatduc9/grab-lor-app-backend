@@ -4,6 +4,7 @@ import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
 import { GoogleMapsService } from 'src/shareModule/googleMap.service';
 import { GatewayBookingService } from '../gateway-booking/gateway-booking.service';
 import { GatewayBookingGateway } from '../gateway-booking/gateway-booking.gateway';
+import { CreateBookingPostitionDto } from './dto/booking.dto';
 
 @Controller('booking')
 export class BookingController {
@@ -11,7 +12,7 @@ export class BookingController {
     private readonly bookingService: BookingService,
     // private readonly gatewayBookingService: GatewayBookingService,
     // private gatewayBookingGateway: GatewayBookingGateway,
-  ) {}
+  ) { }
 
   // @Post()
   @Get('getPrice')
@@ -21,11 +22,17 @@ export class BookingController {
   ): Promise<number> {
     return this.bookingService.calculatePrice(distanceInKm, vehicleType);
   }
-@Get('getLocations')
+  @Get('getLocations')
   getLocations(@Body('phoneNumber') phoneNumber: string): Promise<any> {
     return this.bookingService.getLocationByPhoneNumber(phoneNumber);
   }
 
+  @Post('createPosition')
+  async createPosition(
+    @Body() createBookingPostitionDto: CreateBookingPostitionDto,
+  ): Promise<any> {
+    return this.bookingService.createBookingPostition(createBookingPostitionDto);
+  }
 
   // @Post('request-ride')
   // async requestRide(@Body() body: any): Promise<any> {

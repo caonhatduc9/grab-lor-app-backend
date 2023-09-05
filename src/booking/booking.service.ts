@@ -8,6 +8,8 @@ import { Repository } from 'typeorm';
 import { Booking } from 'src/entities/booking.entity';
 import { Route } from 'src/entities/route.entity';
 import { Location } from 'src/entities/location.entity';
+import { BookingPosition } from 'src/entities/bookingPosition.entity';
+import { CreateBookingPostitionDto } from './dto/booking.dto';
 
 @Injectable()
 export class BookingService {
@@ -28,6 +30,8 @@ export class BookingService {
     private readonly bookingRepository: Repository<Booking>, // private userService: UserService
     @Inject('ROUTE_REPOSITORY')
     private readonly routegRepository: Repository<Route>,
+    @Inject('BOOKING_POSITION_REPOSITORY')
+    private readonly bookingPositionRepository: Repository<BookingPosition>,
   ) {
     this.pricingStrategyFactory = pricingStrategyFactory;
   }
@@ -81,6 +85,22 @@ export class BookingService {
     return location;
   }
 
+  async createBookingPostition(createBookingPostition: CreateBookingPostitionDto): Promise<any> {
+    const newBookingPosition = new BookingPosition();
+    const currentTime = new Date();
+
+    // Định dạng thời gian hiện tại thành chuỗi DATETIME
+    const formattedTime = currentTime.toISOString().slice(0, 19).replace('T', ' ');
+    console.log('formattedTime', formattedTime);
+    newBookingPosition.customerName = createBookingPostition.customerName;
+    newBookingPosition.phoneNumber = createBookingPostition.phoneNumber;
+    newBookingPosition.pickupAddress = createBookingPostition.pickupAddress;
+    newBookingPosition.destAddress = createBookingPostition.destAddress;
+    newBookingPosition.timeBooking = formattedTime;
+    console.log('newBookingPosition', newBookingPosition);
+    const savedBookingPosition = this.bookingPositionRepository.save(newBookingPosition);
+    return savedBookingPosition;
+  }
   // async getBookings(): Promise<any[]> {
   //   const bookings = await this.bookingRepository.createQueryBuilder("booking")
   //     .leftJoinAndSelect("booking.customer", "customer")
