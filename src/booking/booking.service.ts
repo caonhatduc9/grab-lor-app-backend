@@ -98,8 +98,12 @@ export class BookingService {
     newBookingPosition.destAddress = createBookingPostition.destAddress;
     newBookingPosition.timeBooking = formattedTime;
     console.log('newBookingPosition', newBookingPosition);
-    const savedBookingPosition = this.bookingPositionRepository.save(newBookingPosition);
-    return savedBookingPosition;
+    const savedBookingPosition = await this.bookingPositionRepository.save(newBookingPosition);
+    return {
+      statusCode: 200,
+      message: 'Create Booking Position Successfully',
+      bookingPosition: savedBookingPosition,
+    }
   }
 
   async getBookingPositions(): Promise<any> {
@@ -119,7 +123,11 @@ export class BookingService {
       const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
       bookingPosition.timeBooking = formattedDateTime;
     })
-    return bookingPositions;
+    return {
+      statusCode: 200,
+      message: 'Get Booking Position Successfully',
+      data: bookingPositions,
+    }
   }
 
   //   // return 0;
