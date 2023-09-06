@@ -109,7 +109,7 @@ export class BookingService {
   async getBookingPositions(): Promise<any> {
     const bookingPositions = await this.bookingPositionRepository.find();
     bookingPositions.forEach((bookingPosition) => {
-      delete bookingPosition.bookingPositionId;
+      // delete bookingPosition.bookingPositionId;
       const dateTime = new Date(bookingPosition.timeBooking);
       // Lấy các thành phần của ngày và giờ
       const hours = dateTime.getHours();
@@ -130,6 +130,50 @@ export class BookingService {
     }
   }
 
+  async getBookingPositionByPhoneNumber(phoneNumber: string): Promise<any> {
+    const bookingPositions = await this.bookingPositionRepository.findBy({ phoneNumber: phoneNumber });
+    console.log("booking", bookingPositions);
+    bookingPositions.forEach((bookingPosition) => {
+      // delete bookingPosition.bookingPositionId;
+      const dateTime = new Date(bookingPosition.timeBooking);
+      // Lấy các thành phần của ngày và giờ
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const seconds = dateTime.getSeconds();
+      const day = dateTime.getDate();
+      const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+      const year = dateTime.getFullYear();
+      // Định dạng lại thành chuỗi theo yêu cầu
+      const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+      bookingPosition.timeBooking = formattedDateTime;
+    })
+    return {
+      statusCode: 200,
+      message: 'Get Booking Position Successfully',
+      data: bookingPositions,
+    }
+  }
+  async getBookingPositionById(id: number): Promise<any> {
+    const bookingPosition = await this.bookingPositionRepository.findOneBy({ bookingPositionId: id });
+
+    // delete bookingPosition.bookingPositionId;
+    const dateTime = new Date(bookingPosition.timeBooking);
+    // Lấy các thành phần của ngày và giờ
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+    const seconds = dateTime.getSeconds();
+    const day = dateTime.getDate();
+    const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+    const year = dateTime.getFullYear();
+    // Định dạng lại thành chuỗi theo yêu cầu
+    const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+    bookingPosition.timeBooking = formattedDateTime;
+    return {
+      statusCode: 200,
+      message: 'Get Booking Position Successfully',
+      data: bookingPosition,
+    }
+  }
   //   // return 0;
   // }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
 import { GoogleMapsService } from 'src/shareModule/googleMap.service';
@@ -36,6 +36,15 @@ export class BookingController {
   @Get('getBookingPositions')
   async getBookingPositions(): Promise<any> {
     return this.bookingService.getBookingPositions();
+  }
+  @Get('getBookingPositionByPhoneNumber')
+  async getBookingPositionByPhoneNumber(@Query('phoneNumber') phoneNumber: string): Promise<any> {
+    return this.bookingService.getBookingPositionByPhoneNumber(phoneNumber);
+  }
+
+  @Get('getBookingPositionById')
+  async getBookingPositionById(@Query('bookingPositionId') bookingPositionId: number): Promise<any> {
+    return this.bookingService.getBookingPositionById(+bookingPositionId);
   }
 
   // @Post('request-ride')
