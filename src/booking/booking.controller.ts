@@ -22,7 +22,7 @@ export class BookingController {
   ): Promise<number> {
     return this.bookingService.calculatePrice(distanceInKm, vehicleType);
   }
-  @Get('getLocations')
+  @Post('getLocations')
   getLocations(@Body('phoneNumber') phoneNumber: string): Promise<any> {
     return this.bookingService.getLocationByPhoneNumber(phoneNumber);
   }
