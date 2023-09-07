@@ -24,7 +24,8 @@ export class BookingService {
     pricingStrategyFactory: PricingStrategyFactory,
     private userService: UserService,
     private googleMapService: GoogleMapsService,
-    // private gatewayBookingService: GatewayBookingService,
+    private gatewayBookingService: GatewayBookingService,
+    private gatewayBookingGateway: GatewayBookingGateway,
     // private gatewayBookingGateway: GatewayBookingGateway,
     @Inject('BOOKING_REPOSITORY')
     private readonly bookingRepository: Repository<Booking>, // private userService: UserService
@@ -48,17 +49,7 @@ export class BookingService {
     };
   }
 
-  async getInforCustomer(customerId: number): Promise<any> {
-    // console.log('customerId', customerId);
-    const customer = await this.userService.getUserCustomerById(customerId);
-    delete customer.password;
-    delete customer.roleId;
-    delete customer.authProvider;
-    delete customer.customer;
-    delete customer.isActive;
-    delete customer.avatar;
-    return customer;
-  }
+
 
 
   async getLocationByPhoneNumber(phoneNumber: string): Promise<any[]> {
@@ -174,6 +165,73 @@ export class BookingService {
       data: bookingPosition,
     }
   }
+  async createBooking(body: any): Promise<any> {
+    //customer da cos tau khoan => tu sdt tim ra tk => goi tai xe, gui thong tin booking
+    const { phoneNumber, pickup, destination, vehicleType, price, paymentMethod } = body;
+    const customer = await this.gatewayBookingService.getInforCustomerByPhoneNumber(phoneNumber);
+    try {
+      // find nearest driverSocket
+      const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(body.pickup);
+      console.log("nearestDriver", nearestDriver);
+      if (nearestDriver.statusCode === 404) {
+        // this.gatewayBookingGateway.sendDriverInfoToCustomer(+customerId, {
+        //   statusCode: 404,
+        //   message: 'all driver not available please try again later',
+        // });
+        // return;
+        console.log("not found available driver");
+        return 0;
+      }
+      const driverSocket = await this.gatewayBookingService.getDriverSocketById(
+        nearestDriver.driverId,
+      );
+      console.log('driverSocket found');
+
+      //send request book to the driver
+      const driverResponsePromise = new Promise((resolve) => {
+        this.gatewayBookingGateway.sendRideRequestToDriver(
+          nearestDriver.driverId,
+          { customer, pickup, destination, vehicleType, price, paymentMethod },
+        );
+        const interval = setInterval(() => {
+          if (this.gatewayBookingGateway.driverResponses.has(driverSocket.socketId)) {
+            clearInterval(interval);
+            resolve(this.gatewayBookingGateway.driverResponses.get(driverSocket.socketId));
+          }
+        }, 1000);
+      });
+
+      if (driverSocket) {
+        console.log("====driverSocket", driverSocket);
+        const driverResponse = await driverResponsePromise;
+        console.log("check 161");
+        // console.log("====driverResponses", driverResponse, this.driverResponses.get(driverSocket.socketId));
+        console.log("check 163", this.gatewayBookingGateway.driverResponses.get(driverSocket.socketId));
+        if (this.gatewayBookingGateway.driverResponses.get(driverSocket.socketId) === 'accept') {
+          // // const driverSocket
+          // this.userService.updateStatusDriver(+nearestDriver.driverId, 'driving');
+          // this.gatewayBookingGateway.driverResponses.delete(driverSocket.socketId);
+
+          // this.gatewayBookingGateway.sendDriverInfoToCustomer(+customerId, {
+          // statusCode: 200,
+          //   message: 'accepted',
+          //   driverInfo: nearestDriver,
+          // });
+          console.log("driver accepted");
+        }
+      } else {
+        // this.gatewayBookingGateway.sendDriverInfoToCustomer(+customerId, { message: 'Driver not available' });
+        console.log("driver didn't accepted");
+      }
+    } catch (error) {
+      // this.sendDriverInfoToCustomer(+customerId, {
+      //   statusCode: 404,
+      //   message: 'No available driver found',
+      // });
+      console.log("No available driver found");
+    }
+  }
+
   //   // return 0;
   // }
 
@@ -216,3 +274,5 @@ export class BookingService {
   //   }
   // }
 }
+
+

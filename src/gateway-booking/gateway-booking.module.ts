@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { GatewayBookingService } from './gateway-booking.service';
 import { GatewayBookingGateway } from './gateway-booking.gateway';
 import { GatewayBookingProviders } from './providers/gateway-booking.provider';
@@ -8,12 +8,12 @@ import { BookingModule } from '../booking/booking.module';
 import { SharedModule } from '../shareModule/share.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule, BookingModule, SharedModule],
+  imports: [DatabaseModule, UserModule, SharedModule],
   providers: [
     GatewayBookingGateway,
     GatewayBookingService,
     ...GatewayBookingProviders,
   ],
-  exports: [GatewayBookingService],
+  exports: [GatewayBookingService, GatewayBookingGateway],
 })
-export class GatewayBookingModule {}
+export class GatewayBookingModule { }

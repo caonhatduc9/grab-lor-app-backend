@@ -72,6 +72,14 @@ export class UserService {
       .getOne();
     return result;
   }
+  async getUserCustomerByPhoneNumber(phoneNumber: string): Promise<any> {
+    const result = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.customer', 'customer')
+      .where('user.phoneNumber = :phoneNumber', { phoneNumber })
+      .getOne();
+    return result;
+  }
 
   async saveCustomer(customer: Customer): Promise<Customer> {
     return await this.customerRepository.save(customer);

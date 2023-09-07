@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { BookingController } from './booking.controller';
 import { PricingStrategyFactory } from 'src/pricing/pricing.factory';
@@ -8,9 +8,9 @@ import { BookingProviders } from './providers/booking.providers';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [UserModule, DatabaseModule],
+  imports: [UserModule, DatabaseModule, GatewayBookingModule],
   controllers: [BookingController],
   providers: [BookingService, PricingStrategyFactory, ...BookingProviders],
   exports: [BookingService],
 })
-export class BookingModule {}
+export class BookingModule { }

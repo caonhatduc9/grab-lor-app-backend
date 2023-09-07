@@ -47,6 +47,11 @@ export class BookingController {
     return this.bookingService.getBookingPositionById(+bookingPositionId);
   }
 
+  @Post('createBooking')
+  async createBooking(@Body() body: any): Promise<any> {
+    this.bookingService.createBooking(body);
+  }
+
   // @Post('request-ride')
   // async requestRide(@Body() body: any): Promise<any> {
   //   const { customer, pickup, destination, vehicleType } = body;

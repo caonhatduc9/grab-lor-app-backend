@@ -20,7 +20,6 @@ export class GatewayBookingService {
     private readonly gatewayCustomerRepository: Repository<SocketCustomer>, // private userService: UserService
     private readonly userService: UserService,
     private googleMapService: GoogleMapsService,
-    private readonly bookingService: BookingService,
   ) { }
 
   async addDriverSocket(
@@ -53,6 +52,30 @@ export class GatewayBookingService {
 
   async removeDriverSocket(driverId: number): Promise<void> {
     await this.gatewayDriverRepository.delete({ driverId });
+  }
+
+  async getInforCustomer(customerId: number): Promise<any> {
+    // console.log('customerId', customerId);
+    const customer = await this.userService.getUserCustomerById(customerId);
+    delete customer.password;
+    delete customer.roleId;
+    delete customer.authProvider;
+    delete customer.customer;
+    delete customer.isActive;
+    delete customer.avatar;
+    return customer;
+  }
+
+  async getInforCustomerByPhoneNumber(phoneNumber: string): Promise<any> {
+    // console.log('customerId', customerId);
+    const customer = await this.userService.getUserCustomerByPhoneNumber(phoneNumber);
+    delete customer.password;
+    delete customer.roleId;
+    delete customer.authProvider;
+    delete customer.customer;
+    delete customer.isActive;
+    delete customer.avatar;
+    return customer;
   }
 
   async addCustomerSocket(
@@ -106,7 +129,7 @@ export class GatewayBookingService {
     };
   }
 
-  async findNearestDriverOnline(payload: any): Promise<any> {
+  async findNearestDriverOnline(pickup: any): Promise<any> {
     const drivers = await this.userService.getDriversOnline();
     if (drivers.length === 0) return {
       statusCode: 404,
@@ -114,7 +137,7 @@ export class GatewayBookingService {
     };
     try {
       const nearestDriver = await this.googleMapService.findNearestDriver(
-        payload.pickup,
+        pickup,
         drivers,
       );
       return nearestDriver;
