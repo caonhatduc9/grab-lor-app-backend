@@ -8,12 +8,20 @@ import { UploadImageModule } from './upload-image/upload-image.module';
 import { UserModule } from './user/user.module';
 import { BookingModule } from './booking/booking.module';
 import { GatewayBookingModule } from './gateway-booking/gateway-booking.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    
     DatabaseModule,
     AuthModule,
     UploadImageModule,
@@ -24,4 +32,4 @@ import { GatewayBookingModule } from './gateway-booking/gateway-booking.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

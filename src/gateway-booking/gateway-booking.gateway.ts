@@ -5,6 +5,8 @@ import { UpdateLocationDto } from './dto/updateLocation.dto';
 import { GatewayBookingService } from './gateway-booking.service';
 import { UserService } from '../user/user.service';
 import { timeOutResponseDriver, timeIntervalResponseDriver } from '../config/booking.config';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 
 @Injectable()
 @WebSocketGateway()
@@ -15,6 +17,7 @@ export class GatewayBookingGateway {
   constructor(
     private readonly gatewayBookingService: GatewayBookingService,
     private readonly userService: UserService,
+    @InjectQueue('createBooking') private createBookingQueue: Queue
   ) {
     this.driverResponses = new Map<string, any>();
   }
@@ -90,51 +93,56 @@ export class GatewayBookingGateway {
 
   @SubscribeMessage('createBooking')
   async handleCreateBooking(client: Socket, payload: any) {
+
     const customerId = client.handshake.query.customerId as string;
+    payload.customerId = customerId;
+    await this.createBookingQueue.add('createBooking', payload, {
+      removeOnComplete: true,
+    });
 
-    try {
-      const { pickup, destination, vehicleType, price, paymentMethod } = payload;
-      const customer = await this.gatewayBookingService.getInforCustomer(+customerId);
-      const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(pickup);
+    // try {
+    //   const { pickup, destination, vehicleType, price, paymentMethod } = payload;
+    //   const customer = await this.gatewayBookingService.getInforCustomer(+customerId);
+    //   const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(pickup);
 
-      if (nearestDriver.statusCode === 404) {
-        this.sendDriverInfoToCustomer(+customerId, {
-          statusCode: 404,
-          message: 'No available driver found, please try again later',
-        });
-        return;
-      }
-      try {
-        const driverSocket = await this.gatewayBookingService.getDriverSocketById(nearestDriver.driverId);
+    //   if (nearestDriver.statusCode === 404) {
+    //     this.sendDriverInfoToCustomer(+customerId, {
+    //       statusCode: 404,
+    //       message: 'No available driver found, please try again later',
+    //     });
+    //     return;
+    //   }
+    //   try {
+    //     const driverSocket = await this.gatewayBookingService.getDriverSocketById(nearestDriver.driverId);
 
-        if (driverSocket) {
-          const driverResponse = await this.sendRideRequestToDriver(
-            nearestDriver.driverId,
-            { customer, pickup, destination, vehicleType, price, paymentMethod, customerId },
-          );
+    //     if (driverSocket) {
+    //       const driverResponse = await this.sendRideRequestToDriver(
+    //         nearestDriver.driverId,
+    //         { customer, pickup, destination, vehicleType, price, paymentMethod, customerId },
+    //       );
 
-          if (driverResponse === 'accept') {
-            this.userService.updateStatusDriver(+nearestDriver.driverId, 'driving');
-            this.sendDriverInfoToCustomer(+customerId, {
-              statusCode: 200,
-              message: 'accepted',
-              driverInfo: nearestDriver,
-            });
-          }
-        } else {
-          //tai xe tu choi cuoc xe
-          // this.sendDriverInfoToCustomer(+customerId, { message: 'Driver not available' });
-        }
-      } catch (error) {
-        console.log("Failed to send driver info", error);
-        //cho nay can danh dau tai xe da bỏ qua cuoc xe 
-      }
-    } catch (error) {
-      this.sendDriverInfoToCustomer(payload.customerId, {
-        statusCode: 500,
-        message: 'Error requesting ride',
-      });
-    }
+    //       if (driverResponse === 'accept') {
+    //         this.userService.updateStatusDriver(+nearestDriver.driverId, 'driving');
+    //         this.sendDriverInfoToCustomer(+customerId, {
+    //           statusCode: 200,
+    //           message: 'accepted',
+    //           driverInfo: nearestDriver,
+    //         });
+    //       }
+    //     } else {
+    //       //tai xe tu choi cuoc xe
+    //       // this.sendDriverInfoToCustomer(+customerId, { message: 'Driver not available' });
+    //     }
+    //   } catch (error) {
+    //     console.log("Failed to send driver info", error);
+    //     //cho nay can danh dau tai xe da bỏ qua cuoc xe 
+    //   }
+    // } catch (error) {
+    //   this.sendDriverInfoToCustomer(payload.customerId, {
+    //     statusCode: 500,
+    //     message: 'Error requesting ride',
+    //   });
+    // }
   }
 
   async sendRideRequestToDriver(driverId: string, payload: any): Promise<string> {
