@@ -17,52 +17,53 @@ export class CreateBookingProcessor {
     @Process('createBooking')
     async handleCreateBooking(job: Job<any>) {
         const payload = job.data;
-
-        try {
-            const { customerId, pickup, destination, vehicleType, price, paymentMethod } = payload;
-            const customer = await this.gatewayBookingService.getInforCustomer(+payload.customerId);
-            const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(pickup);
-
-            if (nearestDriver.statusCode === 404) {
-                this.gatewayBookingGateway.sendDriverInfoToCustomer(+payload.customerId, {
-                    statusCode: 404,
-                    message: 'No available driver found, please try again later',
-                });
-                return;
-            }
+        if (payload && payload.customerId) {
             try {
-                const driverSocket = await this.gatewayBookingService.getDriverSocketById(nearestDriver.driverId);
+                const { customerId, pickup, destination, vehicleType, price, paymentMethod } = payload;
+                const customer = await this.gatewayBookingService.getInforCustomer(+payload.customerId);
+                const nearestDriver = await this.gatewayBookingService.findNearestDriverOnline(pickup);
 
-                if (driverSocket) {
-                    const driverResponse = await this.gatewayBookingGateway.sendRideRequestToDriver(
-                        nearestDriver.driverId,
-                        { customer, pickup, destination, vehicleType, price, paymentMethod, customerId },
-                    );
+                if (nearestDriver.statusCode === 404) {
+                    this.gatewayBookingGateway.sendDriverInfoToCustomer(+payload.customerId, {
+                        statusCode: 404,
+                        message: 'No available driver found, please try again later',
+                    });
+                    return;
+                }
+                try {
+                    const driverSocket = await this.gatewayBookingService.getDriverSocketById(nearestDriver.driverId);
 
-                    if (driverResponse === 'accept') {
-                        this.userService.updateStatusDriver(+nearestDriver.driverId, 'driving');
-                        this.gatewayBookingGateway.sendDriverInfoToCustomer(+customerId, {
-                            statusCode: 200,
-                            message: 'accepted',
-                            driverInfo: nearestDriver,
-                        });
+                    if (driverSocket) {
+                        const driverResponse = await this.gatewayBookingGateway.sendRideRequestToDriver(
+                            nearestDriver.driverId,
+                            { customer, pickup, destination, vehicleType, price, paymentMethod, customerId },
+                        );
+
+                        if (driverResponse === 'accept') {
+                            this.userService.updateStatusDriver(+nearestDriver.driverId, 'driving');
+                            this.gatewayBookingGateway.sendDriverInfoToCustomer(+customerId, {
+                                statusCode: 200,
+                                message: 'accepted',
+                                driverInfo: nearestDriver,
+                            });
+                        }
+                    } else {
+                        //tai xe tu choi cuoc xe
+                        // this.sendDriverInfoToCustomer(+customerId, { message: 'Driver not available' });
                     }
-                } else {
-                    //tai xe tu choi cuoc xe
-                    // this.sendDriverInfoToCustomer(+customerId, { message: 'Driver not available' });
+                } catch (error) {
+                    console.log("Failed to send driver info", error);
+                    //cho nay can danh dau tai xe da bỏ qua cuoc xe 
                 }
             } catch (error) {
-                console.log("Failed to send driver info", error);
-                //cho nay can danh dau tai xe da bỏ qua cuoc xe 
+                this.gatewayBookingGateway.sendDriverInfoToCustomer(payload.customerId, {
+                    statusCode: 500,
+                    message: 'Error requesting ride',
+                });
             }
-        } catch (error) {
-            this.gatewayBookingGateway.sendDriverInfoToCustomer(payload.customerId, {
-                statusCode: 500,
-                message: 'Error requesting ride',
-            });
-        }
 
-        // const result = await this.gatewayBookingService.handleCreateBooking(payload);
-        // return result;
+            // const result = await this.gatewayBookingService.handleCreateBooking(payload);
+            // return result;
+        }
     }
 }

@@ -8,7 +8,7 @@ import { BookingProviders } from './providers/booking.providers';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [UserModule, DatabaseModule, GatewayBookingModule],
+  imports: [UserModule, DatabaseModule, GatewayBookingModule,],
   controllers: [BookingController],
   providers: [BookingService, PricingStrategyFactory, ...BookingProviders],
   exports: [BookingService],
