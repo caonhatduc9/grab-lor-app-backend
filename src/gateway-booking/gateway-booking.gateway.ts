@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateLocationDto } from './dto/updateLocation.dto';
 import { GatewayBookingService } from './gateway-booking.service';
 import { UserService } from '../user/user.service';
-import { bookingConfig } from '../config/booking.config';
+import { timeOutResponseDriver, timeIntervalResponseDriver } from '../config/booking.config';
 
 @Injectable()
 @WebSocketGateway()
@@ -145,20 +145,20 @@ export class GatewayBookingGateway {
       this.server.to(socket.socketId).emit('rideRequest', payload);
 
       return new Promise((resolve, reject) => {
-        let timeoutId;
+        let timeoutId: any;
         const interval = setInterval(() => {
           if (this.driverResponses.has(socketId)) {
             clearInterval(interval);
             clearTimeout(timeoutId);
             resolve(this.driverResponses.get(socketId));
           }
-        }, 1000);
+        }, timeIntervalResponseDriver);
 
         // Set a timeout to cancel waiting if no response received
         timeoutId = setTimeout(() => {
           clearInterval(interval);
           reject(new Error('Timeout: No response from driver.'));
-        }, bookingConfig.timeOutIntervelResponse); // Timeout after 30 seconds (adjust to your desired timeout value)
+        }, timeOutResponseDriver); // Timeout after 30 seconds (adjust to your desired timeout value)
       });
     }
   }
