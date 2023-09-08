@@ -207,7 +207,7 @@ export class BookingService {
       .leftJoinAndSelect("booking.route", "route")
       .leftJoinAndSelect("route.endLocation2", "endLocation")
       .leftJoinAndSelect("route.startLocation2", "startLocation")
-      .select(["booking.bookingId", "customer.customerId", "user.phoneNumber", "user.username", "route.routeId", "startLocation", "endLocation"])
+      .select(["booking.bookingId", "booking.state", "customer.customerId", "user.phoneNumber", "user.username", "route.routeId", "startLocation", "endLocation"])
       .where("booking.typeBooking = :typeBooking", { typeBooking: "WEB" })
       .getMany();
     const formatedBooking = bookings.map((booking) => {
@@ -218,6 +218,7 @@ export class BookingService {
         // routeId: booking.route.routeId,
         phoneNumber: booking.customer.user.phoneNumber,
         username: booking.customer.user.username,
+        status: booking.state.toLocaleLowerCase(),
         startLocation: booking.route.startLocation2,
         endLocation: booking.route.endLocation2,
       }
