@@ -11,6 +11,7 @@ import {
 import { Booking } from './booking.entity';
 import { User } from './user.entity';
 import { SocketCustomer } from './socketCustomer.entity';
+import { BookingPosition } from './bookingPosition.entity';
 
 @Index('customer_fk0', ['userId'], {})
 @Entity('customer', { schema: 'grab_lor' })
@@ -27,6 +28,11 @@ export class Customer {
   @Column('tinyint', { name: 'is_vip', default: () => "'0'" })
   isVip: number;
 
+  @OneToMany(
+    () => BookingPosition,
+    (bookingPosition) => bookingPosition.customer
+  )
+  bookingPositions: BookingPosition[];
   @OneToMany(() => Booking, (booking) => booking.customer)
   bookings: Booking[];
 

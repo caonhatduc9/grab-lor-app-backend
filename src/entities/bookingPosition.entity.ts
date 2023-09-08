@@ -1,5 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+    Column,
+    Entity,
+    Index,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Customer } from "./customer.entity";
 
+@Index("booking_position_FK", ["customerId"], {})
 @Entity("booking_position", { schema: "grab_lor" })
 export class BookingPosition {
     @PrimaryGeneratedColumn({ type: "int", name: "booking_position_id" })
@@ -17,6 +26,13 @@ export class BookingPosition {
     @Column("datetime", { name: "timeBooking", nullable: true })
     timeBooking: string | null;
 
-    @Column("varchar", { name: "customer_name", nullable: true, length: 50 })
-    customerName: string | null;
+    @Column("int", { name: "customerId", nullable: true })
+    customerId: number | null;
+
+    @ManyToOne(() => Customer, (customer) => customer.bookingPositions, {
+        onDelete: "NO ACTION",
+        onUpdate: "NO ACTION",
+    })
+    @JoinColumn([{ name: "customerId", referencedColumnName: "customerId" }])
+    customer: Customer;
 }

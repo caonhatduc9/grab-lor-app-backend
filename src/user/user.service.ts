@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from './dto/createUser.dto';
@@ -170,5 +170,24 @@ export class UserService {
     }
     driver.status = status as DriverStatus;
     return await this.driverRepository.save(driver);
+  }
+
+  async createCustomerForWeb({ phoneNumber, customerName }): Promise<any> {
+
+    const roleName = "customer"; // Vai trò được chọn từ payload, ở đây ví dụ là "customer"
+    const foundRole = await this.findRoleByName(roleName);
+    if (!foundRole) {
+      throw new BadRequestException('Invalid role');
+    }
+
+    const user = new User();
+    user.roleId = foundRole.roleId;
+    user.phoneNumber = phoneNumber;
+    user.username = customerName;
+    const savedUser = await this.userRepository.save(user);
+    const newCustomer = new Customer();
+    newCustomer.userId = savedUser.userId;
+    const savedCustomer = await this.customerRepository.save(newCustomer);
+    return savedCustomer;
   }
 }

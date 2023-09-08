@@ -173,7 +173,7 @@ export class GatewayBookingGateway {
 
   async sendDriverInfoToCustomer(customerId: number, payload: any) {
     const customerSocket = await this.gatewayBookingService.getCustomerSocketById(customerId);
-    if (customerSocket.socketId) {
+    if (customerSocket && customerSocket.socketId) {
       this.server.to(customerSocket.socketId).emit('driverInfo', payload);
     }
   }

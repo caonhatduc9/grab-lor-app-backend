@@ -49,7 +49,11 @@ export class BookingController {
 
   @Post('createBooking')
   async createBooking(@Body() body: any): Promise<any> {
-   return await this.bookingService.createBooking(body);
+    return await this.bookingService.createBooking(body);
+  }
+  @Get('getBookings')
+  async getBookings(): Promise<any> {
+    return await this.bookingService.getBookings();
   }
 
   // @Post('request-ride')

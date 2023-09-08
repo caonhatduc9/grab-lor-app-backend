@@ -9,6 +9,10 @@ import { UserService } from 'src/user/user.service';
 import { SocketCustomer } from 'src/entities/socketCustomer.entity';
 import { GoogleMapsService } from '../shareModule/googleMap.service';
 import { BookingService } from '../booking/booking.service';
+import { DriverBooking } from 'src/entities/driverBooking.entity';
+import { Booking } from 'src/entities/booking.entity';
+import { Route } from 'src/entities/route.entity';
+import { Location } from 'src/entities/location.entity';
 
 @Injectable()
 export class GatewayBookingService {
@@ -16,6 +20,14 @@ export class GatewayBookingService {
   constructor(
     @Inject('SOCKET_DRIVER_REPOSITORY')
     private gatewayDriverRepository: Repository<SocketDriver>,
+    @Inject('SOCKET_CUSTOMER_REPOSITORY')
+    private driverBookingrRepository: Repository<DriverBooking>,
+    @Inject('LOCATION_REPOSITORY')
+    private locationRepository: Repository<Location>,
+    @Inject('ROUTE_REPOSITORY')
+    private routeRepository: Repository<Route>,
+    @Inject('BOOKING_REPOSITORY')
+    private bookingRepository: Repository<Booking>,
     @Inject('SOCKET_CUSTOMER_REPOSITORY')
     private readonly gatewayCustomerRepository: Repository<SocketCustomer>, // private userService: UserService
     private readonly userService: UserService,
@@ -69,12 +81,15 @@ export class GatewayBookingService {
   async getInforCustomerByPhoneNumber(phoneNumber: string): Promise<any> {
     // console.log('customerId', customerId);
     const customer = await this.userService.getUserCustomerByPhoneNumber(phoneNumber);
+    const customerId = customer.customer.customerId;
     delete customer.password;
     delete customer.roleId;
     delete customer.authProvider;
     delete customer.customer;
     delete customer.isActive;
     delete customer.avatar;
+    customer.customerId = customerId;
+    console.log("customerINFOR", customer);
     return customer;
   }
 
@@ -150,44 +165,77 @@ export class GatewayBookingService {
     }
   }
 
+  async saveBooking(payload: any): Promise<any> {
+    const newBooking = new Booking();
+    const newRoute = new Route();
+    const newStartLocation = new Location();
+    const newEndLocation = new Location();
 
-  // async createBooking(body: any): Promise<any> {
-  //   const { pickup, destination, vehicleType, paymentMethod } = body;
-  //   const drivers = await this.userService.getDriversOnline();
-  //   const customer = await this.bookingService.getInforCustomer(+body.customerId);
-  //   try {
-  //     // find nearest driver
-  //     const nearestDriver = await this.googleMapService.findNearestDriver(
-  //       body.pickup,
-  //       drivers,
-  //     );
-  //     // console.log("nearestDriver", nearestDriver);
-  //     const driverSocket = await this.getDriverSocketById(
-  //       nearestDriver.driverId,
-  //     );
-  //     //send request book to the driver
-  //     if (driverSocket) {
-  //       this.sendRideRequestToDriver(
-  //         nearestDriver.driverId,
-  //         { customer, pickup, destination, vehicleType, paymentMethod },
-  //       );
-  //       return {
-  //         statusCode: 200,
-  //         message: 'Ride requested',
-  //         nearestDriver: nearestDriver,
-  //       };
-  //     } else {
-  //       return {
-  //         statusCode: 404,
-  //         message: 'Driver not available',
-  //       };
-  //     }
-  //   } catch (error) {
-  //     return {
-  //       statusCode: 404,
-  //       message: 'No available driver found',
-  //     };
-  //   }
-  // }
+    newStartLocation.lat = payload.pickup.lat;
+    newStartLocation.lon = payload.pickup.lon;
+    const savedStartLocation = await this.locationRepository.save(newStartLocation);
+
+    newEndLocation.lat = payload.pickup.lat;
+    newEndLocation.lon = payload.pickup.lon;
+    const savedEndLocation = await this.locationRepository.save(newEndLocation);
+
+    newRoute.startLocation = savedStartLocation.locationId;
+    newRoute.endLocation = savedEndLocation.locationId;
+    newRoute.distance = payload.distance || null;
+    const savedRoute = await this.routeRepository.save(newRoute);
+    console.log("type", payload.vehicleType.toUpperCase());
+    newBooking.routeId = savedRoute.routeId;
+    newBooking.customerId = payload.customerId;
+    newBooking.driverId = payload.driverId;
+    newBooking.typeVehicle = payload.vehicleType.toUpperCase();
+    newBooking.charge = payload.price;
+    newBooking.state = payload.state;
+    newBooking.note = payload.note || null;
+    newBooking.typeBooking = "APP"
+    const savedBooking = await this.bookingRepository.save(newBooking);
+    return savedBooking;
+  }
+
+  async saveBookingForWeb(payload: any): Promise<any> {
+    console.log("checksavebooking", payload);
+    const newBooking = new Booking();
+    const newRoute = new Route();
+    const newStartLocation = new Location();
+    const newEndLocation = new Location();
+
+    newStartLocation.lat = payload.pickup.lat;
+    newStartLocation.lon = payload.pickup.lon;
+    const savedStartLocation = await this.locationRepository.save(newStartLocation);
+
+    newEndLocation.lat = payload.pickup.lat;
+    newEndLocation.lon = payload.pickup.lon;
+    const savedEndLocation = await this.locationRepository.save(newEndLocation);
+
+    newBooking.customerId = payload.customerId;
+    newRoute.startLocation = savedStartLocation.locationId;
+    newRoute.endLocation = savedEndLocation.locationId;
+    newRoute.distance = payload.distance || null;
+    const savedRoute = await this.routeRepository.save(newRoute);
+    console.log("type", payload.vehicleType.toUpperCase());
+    newBooking.routeId = savedRoute.routeId;
+    newBooking.customerId = payload.customerId;
+    newBooking.driverId = payload.driverId || null
+    newBooking.typeVehicle = payload.vehicleType.toUpperCase();
+    newBooking.charge = payload.price || null
+    newBooking.state = payload.state.toUpperCase() || null
+    newBooking.note = payload.note || null;
+    newBooking.typeBooking = "WEB";
+
+    console.log("check214", newBooking);
+    const savedBooking = await this.bookingRepository.save(newBooking);
+    console.log("bookingID saved", savedBooking.bookingId);
+    return savedBooking;
+  }
+
+  async updateBookingstatus(bookingId: number, state: any): Promise<any> {
+    const foundBooking = await this.bookingRepository.findOneBy({ bookingId });
+    foundBooking.state = state.toUpperCase();
+    return await this.bookingRepository.save(foundBooking);
+  }
 
 }

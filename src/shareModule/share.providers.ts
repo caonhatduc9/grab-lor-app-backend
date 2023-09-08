@@ -3,6 +3,7 @@ import { Asset } from 'src/entities/asset.entity';
 import { Customer } from 'src/entities/customer.entity';
 import { Driver } from 'src/entities/driver.entity';
 import { Location } from 'src/entities/location.entity';
+import { Route } from 'src/entities/route.entity';
 export const ShareProviders = [
   {
     provide: 'ASSET_REPOSITORY',
@@ -22,6 +23,11 @@ export const ShareProviders = [
   {
     provide: 'LOCATION_REPOSITORY',
     useFactory: (dataSource: DataSource) => dataSource.getRepository(Location),
+    inject: ['DATA_SOURCE'],
+  },
+  {
+    provide: 'ROUTE_REPOSITORY',
+    useFactory: (dataSource: DataSource) => dataSource.getRepository(Route),
     inject: ['DATA_SOURCE'],
   },
 ];

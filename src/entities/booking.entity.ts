@@ -11,6 +11,7 @@ import { Customer } from './customer.entity';
 import { Driver } from './driver.entity';
 import { Route } from './route.entity';
 import { Evaluate } from './evaluate.entity';
+import { DriverBooking } from './driverBooking.entity';
 
 @Index('booking_fk0', ['customerId'], {})
 @Index('booking_fk1', ['driverId'], {})
@@ -40,7 +41,12 @@ export class Booking {
     enum: ['CONFIRMED', 'PENDING', 'TRANSITING', 'COMPLETED', 'CANCEL'],
   })
   state: 'CONFIRMED' | 'PENDING' | 'TRANSITING' | 'COMPLETED' | 'CANCEL';
-
+  @Column("enum", {
+    name: "type_booking",
+    nullable: true,
+    enum: ["WEB", "APP"],
+  })
+  typeBooking: "WEB" | "APP" | null;
   @Column('int', { name: 'payment' })
   payment: number;
 
@@ -67,7 +73,8 @@ export class Booking {
   })
   @JoinColumn([{ name: 'route_id', referencedColumnName: 'routeId' }])
   route: Route;
-
+  @OneToMany(() => DriverBooking, (driverBooking) => driverBooking.booking)
+  driverBookings: DriverBooking[];
   @OneToMany(() => Evaluate, (evaluate) => evaluate.booking)
   evaluates: Evaluate[];
 }

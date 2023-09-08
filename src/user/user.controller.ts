@@ -22,7 +22,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   @Get()
   findAll() {

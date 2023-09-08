@@ -14,6 +14,7 @@ import { Location } from './location.entity';
 import { DriverLicense } from './driverLicense.entity';
 import { Vehicle } from './vehicle.entity';
 import { SocketDriver } from './socketDriver.entity';
+import { DriverBooking } from './driverBooking.entity';
 
 @Index('driver_fk0', ['userId'], {})
 @Index('driver_fk1', ['location'], {})
@@ -87,4 +88,6 @@ export class Driver {
   vehicle2: Vehicle;
   @OneToMany(() => SocketDriver, (socketDriver) => socketDriver.driver)
   socketDrivers: SocketDriver[];
+  @OneToMany(() => DriverBooking, (driverBooking) => driverBooking.driver)
+  driverBookings: DriverBooking[];
 }
