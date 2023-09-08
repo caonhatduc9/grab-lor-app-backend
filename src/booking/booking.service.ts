@@ -86,6 +86,7 @@ export class BookingService {
 
   async createBookingPostition(createBookingPostition: CreateBookingPostitionDto): Promise<any> {
     try {
+      console.log("createBookingPostition", createBookingPostition);
       const newBookingPosition = new BookingPosition();
       const currentTime = new Date();
       const { phoneNumber, customerName } = createBookingPostition;
@@ -104,7 +105,7 @@ export class BookingService {
       newBookingPosition.pickupAddress = createBookingPostition.pickupAddress;
       newBookingPosition.destAddress = createBookingPostition.destAddress;
       newBookingPosition.timeBooking = formattedTime;
-      newBookingPosition.typeVehicle = createBookingPostition.typeVehicle.toUpperCase();
+      newBookingPosition.typeVehicle = createBookingPostition.vehicleType.toUpperCase() as 'CAR' | 'MOTORBIKE';
       console.log('newBookingPosition', newBookingPosition);
       const savedBookingPosition = await this.bookingPositionRepository.save(newBookingPosition);
       return {
@@ -237,26 +238,26 @@ export class BookingService {
       .getOne();
 
     // delete bookingPosition.bookingPositionId;
-      const user = position.customer.user;
-      const dateTime = new Date(position.timeBooking);
-      // Lấy các thành phần của ngày và giờ
-      const hours = dateTime.getHours();
-      const minutes = dateTime.getMinutes();
-      const seconds = dateTime.getSeconds();
-      const day = dateTime.getDate();
-      const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
-      const year = dateTime.getFullYear();
+    const user = position.customer.user;
+    const dateTime = new Date(position.timeBooking);
+    // Lấy các thành phần của ngày và giờ
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+    const seconds = dateTime.getSeconds();
+    const day = dateTime.getDate();
+    const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+    const year = dateTime.getFullYear();
 
-      // Định dạng lại thành chuỗi theo yêu cầu
-      const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-      const convertedPosition = {
-        phoneNumber: position.phoneNumber,
-        pickupAddress: position.pickupAddress,
-        destAddress: position.destAddress,
-        timeBooking: formattedDateTime,
-        vehicleType: position.typeVehicle.toLocaleLowerCase(),
-        customerName: user.username
-      };
+    // Định dạng lại thành chuỗi theo yêu cầu
+    const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+    const convertedPosition = {
+      phoneNumber: position.phoneNumber,
+      pickupAddress: position.pickupAddress,
+      destAddress: position.destAddress,
+      timeBooking: formattedDateTime,
+      vehicleType: position.typeVehicle.toLocaleLowerCase(),
+      customerName: user.username
+    };
     return {
       statusCode: 200,
       message: 'Get Booking Position Successfully',
