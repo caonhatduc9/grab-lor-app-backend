@@ -104,7 +104,7 @@ export class BookingService {
       newBookingPosition.pickupAddress = createBookingPostition.pickupAddress;
       newBookingPosition.destAddress = createBookingPostition.destAddress;
       newBookingPosition.timeBooking = formattedTime;
-      newBookingPosition.typeVehicle = createBookingPostition.typeVehicle;
+      newBookingPosition.typeVehicle = createBookingPostition.typeVehicle.toUpperCase();
       console.log('newBookingPosition', newBookingPosition);
       const savedBookingPosition = await this.bookingPositionRepository.save(newBookingPosition);
       return {
