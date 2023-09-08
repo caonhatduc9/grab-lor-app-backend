@@ -29,6 +29,9 @@ export class BookingPosition {
     @Column("int", { name: "customerId", nullable: true })
     customerId: number | null;
 
+    @Column('enum', { name: 'type_vehicle', enum: ['CAR', 'MOTORBIKE'] })
+    typeVehicle: 'CAR' | 'MOTORBIKE';
+
     @ManyToOne(() => Customer, (customer) => customer.bookingPositions, {
         onDelete: "NO ACTION",
         onUpdate: "NO ACTION",

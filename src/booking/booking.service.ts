@@ -104,6 +104,7 @@ export class BookingService {
       newBookingPosition.pickupAddress = createBookingPostition.pickupAddress;
       newBookingPosition.destAddress = createBookingPostition.destAddress;
       newBookingPosition.timeBooking = formattedTime;
+      newBookingPosition.typeVehicle = createBookingPostition.typeVehicle;
       console.log('newBookingPosition', newBookingPosition);
       const savedBookingPosition = await this.bookingPositionRepository.save(newBookingPosition);
       return {
@@ -120,10 +121,16 @@ export class BookingService {
     }
   }
   async getBookingPositions(): Promise<any> {
-    const bookingPositions = await this.bookingPositionRepository.find();
-    bookingPositions.forEach((bookingPosition) => {
-      // delete bookingPosition.bookingPositionId;
-      const dateTime = new Date(bookingPosition.timeBooking);
+    const bookingPositions = await this.bookingPositionRepository.createQueryBuilder('bookingPosition')
+      .leftJoinAndSelect('bookingPosition.customer', 'customer')
+      .leftJoinAndSelect('customer.user', 'user')
+      .getMany();
+
+    const convertedPositions = [];
+
+    for (const position of bookingPositions) {
+      const user = position.customer.user;
+      const dateTime = new Date(position.timeBooking);
       // Lấy các thành phần của ngày và giờ
       const hours = dateTime.getHours();
       const minutes = dateTime.getMinutes();
@@ -134,21 +141,67 @@ export class BookingService {
 
       // Định dạng lại thành chuỗi theo yêu cầu
       const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-      bookingPosition.timeBooking = formattedDateTime;
-    })
+      const convertedPosition = {
+        bookingPositionsId: position.bookingPositionId,
+        phoneNumber: position.phoneNumber,
+        pickupAddress: position.pickupAddress,
+        destAddress: position.destAddress,
+        timeBooking: formattedDateTime,
+        vehicleType: position.typeVehicle.toLowerCase(),
+        customerName: user.username
+      };
+      convertedPositions.push(convertedPosition);
+    }
+
+    // bookingPositions.forEach((bookingPosition) => {
+    //   // delete bookingPosition.bookingPositionId;
+    //   const dateTime = new Date(bookingPosition.timeBooking);
+    //   // Lấy các thành phần của ngày và giờ
+    //   const hours = dateTime.getHours();
+    //   const minutes = dateTime.getMinutes();
+    //   const seconds = dateTime.getSeconds();
+    //   const day = dateTime.getDate();
+    //   const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+    //   const year = dateTime.getFullYear();
+
+    //   // Định dạng lại thành chuỗi theo yêu cầu
+    //   const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+    //   bookingPosition.timeBooking = formattedDateTime;
+    // bookingPosition.customerName = bookingPosition.customer.user.username
+    // })
     return {
       statusCode: 200,
       message: 'Get Booking Position Successfully',
-      data: bookingPositions,
+      data: convertedPositions,
     }
   }
 
   async getBookingPositionByPhoneNumber(phoneNumber: string): Promise<any> {
-    const bookingPositions = await this.bookingPositionRepository.findBy({ phoneNumber: phoneNumber });
+    const bookingPositions = await this.bookingPositionRepository.createQueryBuilder('bookingPosition')
+      .leftJoinAndSelect('bookingPosition.customer', 'customer')
+      .leftJoinAndSelect('customer.user', 'user')
+      .where('bookingPosition.phoneNumber =:phoneNumber', { phoneNumber: phoneNumber })
+      .getMany();
     console.log("booking", bookingPositions);
-    bookingPositions.forEach((bookingPosition) => {
-      // delete bookingPosition.bookingPositionId;
-      const dateTime = new Date(bookingPosition.timeBooking);
+    // bookingPositions.forEach((bookingPosition) => {
+    //   // delete bookingPosition.bookingPositionId;
+    //   const dateTime = new Date(bookingPosition.timeBooking);
+    //   // Lấy các thành phần của ngày và giờ
+    //   const hours = dateTime.getHours();
+    //   const minutes = dateTime.getMinutes();
+    //   const seconds = dateTime.getSeconds();
+    //   const day = dateTime.getDate();
+    //   const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+    //   const year = dateTime.getFullYear();
+    //   // Định dạng lại thành chuỗi theo yêu cầu
+    //   const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+    //   bookingPosition.timeBooking = formattedDateTime;
+    // })
+    const convertedPositions = [];
+
+    for (const position of bookingPositions) {
+      const user = position.customer.user;
+      const dateTime = new Date(position.timeBooking);
       // Lấy các thành phần của ngày và giờ
       const hours = dateTime.getHours();
       const minutes = dateTime.getMinutes();
@@ -156,35 +209,58 @@ export class BookingService {
       const day = dateTime.getDate();
       const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
       const year = dateTime.getFullYear();
+
       // Định dạng lại thành chuỗi theo yêu cầu
       const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-      bookingPosition.timeBooking = formattedDateTime;
-    })
+      const convertedPosition = {
+        bookingPositionsId: position.bookingPositionId,
+        phoneNumber: position.phoneNumber,
+        pickupAddress: position.pickupAddress,
+        destAddress: position.destAddress,
+        timeBooking: formattedDateTime,
+        vehicleType: position.typeVehicle.toLocaleLowerCase(),
+        customerName: user.username
+      };
+      convertedPositions.push(convertedPosition);
+    }
     return {
       statusCode: 200,
       message: 'Get Booking Position Successfully',
-      data: bookingPositions,
+      data: convertedPositions,
     }
   }
   async getBookingPositionById(id: number): Promise<any> {
-    const bookingPosition = await this.bookingPositionRepository.findOneBy({ bookingPositionId: id });
+    const position = await this.bookingPositionRepository.createQueryBuilder('bookingPosition')
+      .leftJoinAndSelect('bookingPosition.customer', 'customer')
+      .leftJoinAndSelect('customer.user', 'user')
+      .where('bookingPosition.bookingPositionId =:id', { 'id': id })
+      .getOne();
 
     // delete bookingPosition.bookingPositionId;
-    const dateTime = new Date(bookingPosition.timeBooking);
-    // Lấy các thành phần của ngày và giờ
-    const hours = dateTime.getHours();
-    const minutes = dateTime.getMinutes();
-    const seconds = dateTime.getSeconds();
-    const day = dateTime.getDate();
-    const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
-    const year = dateTime.getFullYear();
-    // Định dạng lại thành chuỗi theo yêu cầu
-    const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-    bookingPosition.timeBooking = formattedDateTime;
+      const user = position.customer.user;
+      const dateTime = new Date(position.timeBooking);
+      // Lấy các thành phần của ngày và giờ
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const seconds = dateTime.getSeconds();
+      const day = dateTime.getDate();
+      const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+      const year = dateTime.getFullYear();
+
+      // Định dạng lại thành chuỗi theo yêu cầu
+      const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+      const convertedPosition = {
+        phoneNumber: position.phoneNumber,
+        pickupAddress: position.pickupAddress,
+        destAddress: position.destAddress,
+        timeBooking: formattedDateTime,
+        vehicleType: position.typeVehicle.toLocaleLowerCase(),
+        customerName: user.username
+      };
     return {
       statusCode: 200,
       message: 'Get Booking Position Successfully',
-      data: bookingPosition,
+      data: convertedPosition,
     }
   }
 

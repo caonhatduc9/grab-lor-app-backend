@@ -10,4 +10,5 @@ export class CreateBookingPostitionDto {
     @IsString()
     readonly destAddress: string;
     readonly time: Date;
+    readonly typeVehicle: any;
 }
