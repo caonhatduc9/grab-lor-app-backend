@@ -268,7 +268,7 @@ export class BookingService {
   async createBooking(payload: any): Promise<any> {
     console.log("Create Booking web", payload);
     await this.createBookingQueue.add('createBooking', payload, {
-      removeOnComplete: false,
+      removeOnComplete: true,
     });
     return {
       statusCode: 200,
