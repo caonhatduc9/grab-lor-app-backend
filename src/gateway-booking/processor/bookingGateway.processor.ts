@@ -41,7 +41,7 @@ export class CreateBookingProcessor {
                         );
 
                         if (driverResponse === 'accept') {
-                            const state = "CONFIRMED";
+                            const state = "TRANSITING";
                             this.gatewayBookingService.saveBooking({ ...payload, driverId, state });
                             this.userService.updateStatusDriver(+nearestDriver.driverId, 'driving');
                             this.gatewayBookingGateway.sendDriverInfoToCustomer(+customerId, {
