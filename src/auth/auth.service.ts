@@ -19,6 +19,7 @@ import { clouddebugger } from 'googleapis/build/src/apis/clouddebugger';
 import { UserService } from 'src/user/user.service';
 import { Customer } from 'src/entities/customer.entity';
 import { Exception } from 'handlebars';
+import { Driver } from 'src/entities/driver.entity';
 
 @Injectable()
 export class AuthService {
@@ -96,9 +97,9 @@ export class AuthService {
     }
     //save driver
     if (foundRole.roleName === Role.DRIVER) {
-      // const newDriver = new Customer();
-      // newDriver.userId = savedUser.userId;
-      // this.userService.saveDriver(newDriver);
+      const newDriver = new Driver();
+      newDriver.userId = savedUser.userId;
+      this.userService.saveDriver(newDriver);
     }
     if (savedUser) {
       // await this.settingService.createDefaultSetting(savedUser.userId);

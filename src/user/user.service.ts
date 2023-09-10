@@ -84,6 +84,9 @@ export class UserService {
   async saveCustomer(customer: Customer): Promise<Customer> {
     return await this.customerRepository.save(customer);
   }
+  async saveDriver(driver: Driver): Promise<Driver> {
+    return await this.driverRepository.save(driver);
+  }
   async update(
     userId: number,
     updateUserDto: UpdateUserDto,
