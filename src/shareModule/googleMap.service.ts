@@ -50,4 +50,43 @@ export class GoogleMapsService {
       throw new Error('No driver found.');
     }
   }
+
+  async findNearestDrivers(
+  pickupCoordinates: { lat: number; lon: number },
+  drivers: any,
+  n: number
+): Promise<any[]> {
+  const destinations = drivers
+    .map((driver) => `${driver.location2.lat},${driver.location2.lon}`)
+    .join('|');
+
+  const distanceMatrix = promisify(
+    this.googleMapsClient.distanceMatrix.bind(this.googleMapsClient)
+  );
+  const response = await distanceMatrix({
+    origins: [`${pickupCoordinates.lat},${pickupCoordinates.lon}`],
+    destinations: [destinations],
+    mode: 'driving', // Chỉ định phương tiện là xe đạp
+  });
+
+  const distances = response.json.rows[0].elements;
+  const nearestDrivers = [];
+
+  distances.forEach((distance, index) => {
+    if (
+      distance.status === 'OK' &&
+      nearestDrivers.length < n &&
+      typeof drivers[index] !== 'undefined'
+    ) {
+      nearestDrivers.push(drivers[index]);
+    }
+  });
+
+  if (nearestDrivers.length > 0) {
+    return nearestDrivers;
+  } else {
+    throw new Error('No drivers found.');
+  }
+}
+
 }

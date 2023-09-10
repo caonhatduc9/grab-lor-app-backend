@@ -84,11 +84,28 @@ export class GatewayBookingGateway {
     const driverId = client.handshake.query.driverId as string;
     this.driverResponses.set(client.id, payload.status);
 
-    const driverSocket = await this.gatewayBookingService.getDriverSocketById(+driverId);
-    this.server.to(driverSocket.socketId).emit('driverResponse', {
-      statusCode: 200,
-      message: 'accepted',
-    });
+    if (payload.status === 'accept') {
+      const driverSocket = await this.gatewayBookingService.getDriverSocketById(+driverId);
+      this.server.to(driverSocket.socketId).emit('driverResponse', {
+        statusCode: 200,
+        message: 'accepted',
+      });
+    }
+    else if (payload.status === 'completed') {
+      const driverSocket = await this.gatewayBookingService.getDriverSocketById(+driverId);
+      this.userService.updateStatusDriver(+driverId, 'online');
+      const updateFields = {
+        state: 'COMPLETED',
+      };
+      // ConnectionCheckOutStartedEvent
+      const bookingId = payload.bookingId;
+      console.log("cehck payload ", payload, bookingId);
+      this.gatewayBookingService.updateBookingFields(+bookingId, updateFields)
+      this.server.to(driverSocket.socketId).emit('driverResponse', {
+        statusCode: 200,
+        message: 'completed',
+      });
+    }
   }
 
   @SubscribeMessage('createBooking')
@@ -99,6 +116,16 @@ export class GatewayBookingGateway {
     await this.createBookingQueue.add('createBooking', payload, {
       removeOnComplete: true,
     });
+
+
+    const customerSocket = await this.gatewayBookingService.getCustomerSocketById(+customerId);
+    if (customerSocket && customerSocket.socketId) {
+      this.server.to(customerSocket.socketId).emit('createBooking', {
+        statusCode: 200,
+        message: 'success, finding driver',
+      }
+      );
+    }
 
     // try {
     //   const { pickup, destination, vehicleType, price, paymentMethod } = payload;

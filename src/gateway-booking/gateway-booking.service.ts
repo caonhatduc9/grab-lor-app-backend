@@ -165,6 +165,84 @@ export class GatewayBookingService {
     }
   }
 
+  async findListNearestDriversOnline(pickup: any, numberDriver: number): Promise<any> {
+    const drivers = await this.userService.getDriversOnline();
+    if (drivers.length === 0) return {
+      statusCode: 404,
+      message: 'No available driver found',
+    };
+
+    try {
+      const nearestDrivers = await this.googleMapService.findNearestDrivers(
+        pickup,
+        drivers,
+        numberDriver
+      );
+
+      return nearestDrivers;
+    } catch (err) {
+      console.error(`Error finding nearest drivers: ${err.message}`);
+      return {
+        statusCode: 404,
+        message: 'No available driver found',
+      };
+    }
+  }
+
+
+  async findNearestDriverWithRetry(
+    pickupCoordinates: { lat: number; lon: number },
+    maxRetries: number = 2, // Số lần thử tối đa
+  ): Promise<any> {
+    let retryCount = 0;
+    let nearestDriver;
+    let initialNearestDrivers;
+
+    while (retryCount < maxRetries) {
+      try {
+        if (!initialNearestDrivers) {
+          initialNearestDrivers = await this.findListNearestDriversOnline(
+            pickupCoordinates,
+            maxRetries
+          );
+        }
+
+        // Lọc danh sách tài xế để loại bỏ tài xế đã từ chối
+        const remainingDrivers = initialNearestDrivers.filter(
+          (driver) => !driver || driver.status !== 'rejected',
+        );
+
+        if (remainingDrivers.length === 0) {
+          // Không còn tài xế nào khả dụng
+          throw new Error('No available driver found');
+        }
+
+        nearestDriver = remainingDrivers[0]; // Lấy tài xế gần nhất từ danh sách còn lại
+
+        // Kiểm tra nếu tài xế gần nhất chấp nhận hoặc không có lỗi
+        if (!nearestDriver || nearestDriver.status === 'accepted') {
+          break; // Thoát vòng lặp
+        } else {
+          // Tài xế từ chối, chuyển sang tài xế gần nhất tiếp theo
+          retryCount++;
+        }
+      } catch (error) {
+        // Xử lý lỗi tại đây (ví dụ: log lỗi)
+        console.error(`Error finding nearest driver: ${error.message}`);
+        retryCount++;
+      }
+    }
+
+    // Kiểm tra nếu đã hết số lần thử và vẫn không có tài xế
+    if (!nearestDriver && retryCount === maxRetries) {
+      throw new Error('No available driver found after retries');
+    }
+
+    return nearestDriver;
+  }
+
+
+
   async saveBooking(payload: any): Promise<any> {
     const newBooking = new Booking();
     const newRoute = new Route();
@@ -186,7 +264,7 @@ export class GatewayBookingService {
     console.log("type", payload.vehicleType.toUpperCase());
     newBooking.routeId = savedRoute.routeId;
     newBooking.customerId = payload.customerId;
-    newBooking.driverId = payload.driverId;
+    newBooking.driverId = payload.driverId || null
     newBooking.typeVehicle = payload.vehicleType.toUpperCase();
     newBooking.charge = payload.price;
     newBooking.state = payload.state;
@@ -231,10 +309,16 @@ export class GatewayBookingService {
     console.log("bookingID saved", savedBooking.bookingId);
     return savedBooking;
   }
-
-  async updateBookingstatus(bookingId: number, state: any): Promise<any> {
+  async updateBookingFields(bookingId: number, updateFields: Record<string, any>): Promise<any> {
+    console.log("updateFields", updateFields, bookingId);
     const foundBooking = await this.bookingRepository.findOneBy({ bookingId });
-    foundBooking.state = state.toUpperCase();
+    console.log("foundBooking", foundBooking);
+    // Lặp qua các trường cần cập nhật và áp dụng chúng vào foundBooking
+    for (const field in updateFields) {
+      if (updateFields.hasOwnProperty(field)) {
+        foundBooking[field] = updateFields[field];
+      }
+    }
     return await this.bookingRepository.save(foundBooking);
   }
 
