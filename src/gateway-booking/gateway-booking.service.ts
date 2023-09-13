@@ -244,8 +244,23 @@ export class GatewayBookingService {
 
 
   async saveBooking(payload: any): Promise<any> {
+
+    const currentTime = new Date();
+
+    // Định nghĩa offset cho múi giờ Việt Nam (UTC+7)
+    const vietnamTimeOffset = 7 * 60; // Đổi sang phút
+
+    // Tính toán thời gian theo múi giờ Việt Nam
+    const vietnamTime = new Date(currentTime.getTime() + vietnamTimeOffset * 60000);
+
+    // Định dạng thời gian theo định dạng "YYYY-MM-DD HH:mm:ss"
+    const formattedTime = vietnamTime.toISOString().slice(0, 19).replace('T', ' ');
+
+    console.log('Thời gian hiện tại ở Việt Nam:', formattedTime);
+
     const newBooking = new Booking();
     const newRoute = new Route();
+    newRoute.timePickup = formattedTime;
     const newStartLocation = new Location();
     const newEndLocation = new Location();
 
@@ -275,9 +290,22 @@ export class GatewayBookingService {
   }
 
   async saveBookingForWeb(payload: any): Promise<any> {
-    console.log("checksavebooking", payload);
+    const currentTime = new Date();
+
+    // Định nghĩa offset cho múi giờ Việt Nam (UTC+7)
+    const vietnamTimeOffset = 7 * 60; // Đổi sang phút
+
+    // Tính toán thời gian theo múi giờ Việt Nam
+    const vietnamTime = new Date(currentTime.getTime() + vietnamTimeOffset * 60000);
+
+    // Định dạng thời gian theo định dạng "YYYY-MM-DD HH:mm:ss"
+    const formattedTime = vietnamTime.toISOString().slice(0, 19).replace('T', ' ');
+
+    console.log('Thời gian hiện tại ở Việt Nam:', formattedTime);
+
     const newBooking = new Booking();
     const newRoute = new Route();
+    newRoute.timePickup = formattedTime;
     const newStartLocation = new Location();
     const newEndLocation = new Location();
 

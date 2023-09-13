@@ -24,7 +24,7 @@ export class Route {
   endLocation: number;
 
   @Column('datetime', { name: 'time_pickup' })
-  timePickup: Date;
+  timePickup: string;
 
   @Column('time', { name: 'duration' })
   duration: string;
