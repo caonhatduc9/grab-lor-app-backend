@@ -66,16 +66,30 @@ export class BookingService {
       .leftJoinAndSelect("route.endLocation2", "endLocation")
       .leftJoinAndSelect("route.startLocation2", "startLocation")
       // .leftJoinAndSelect("route.endLocation2", "endLocation")
-      .select(["booking.bookingId", "route.routeId", "startLocation", "endLocation"])
+      .select(["booking.bookingId", "route.routeId", "route.timePickup", "startLocation", "endLocation"])
       .where("user.phoneNumber = :phoneNumber", { phoneNumber: phoneNumber })
       .getMany();
 
     const location = bookings.map((booking) => {
       delete booking.route.startLocation2.locationId
       delete booking.route.endLocation2.locationId
+
+      const dateTime = new Date(booking.route.timePickup);
+      // Lấy các thành phần của ngày và giờ
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const seconds = dateTime.getSeconds();
+      const day = dateTime.getDate();
+      const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+      const year = dateTime.getFullYear();
+
+      // Định dạng lại thành chuỗi theo yêu cầu
+      const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+
       return {
         // bookingId: booking.bookingId,
         // routeId: booking.route.routeId,
+        timePickup: formattedDateTime,
         startLocation: booking.route.startLocation2,
         endLocation: booking.route.endLocation2,
       }
