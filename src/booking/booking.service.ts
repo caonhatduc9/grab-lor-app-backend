@@ -139,6 +139,7 @@ export class BookingService {
     const bookingPositions = await this.bookingPositionRepository.createQueryBuilder('bookingPosition')
       .leftJoinAndSelect('bookingPosition.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'user')
+      .orderBy("bookingPosition.bookingPositionId", "DESC")
       .getMany();
 
     const convertedPositions = [];
@@ -196,6 +197,7 @@ export class BookingService {
       .leftJoinAndSelect('bookingPosition.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'user')
       .where('bookingPosition.phoneNumber =:phoneNumber', { phoneNumber: phoneNumber })
+      .orderBy("bookingPosition.bookingPositionId", "DESC")
       .getMany();
     console.log("booking", bookingPositions);
     // bookingPositions.forEach((bookingPosition) => {
