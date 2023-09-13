@@ -298,18 +298,30 @@ export class BookingService {
       .leftJoinAndSelect("booking.route", "route")
       .leftJoinAndSelect("route.endLocation2", "endLocation")
       .leftJoinAndSelect("route.startLocation2", "startLocation")
-      .select(["booking.bookingId", "booking.state", "customer.customerId", "user.phoneNumber", "user.username", "route.routeId", "startLocation", "endLocation"])
+      .select(["booking.bookingId", "booking.state", "customer.customerId", "user.phoneNumber", "user.username", "route.routeId","route.timePickup", "startLocation", "endLocation"])
       .where("booking.typeBooking = :typeBooking", { typeBooking: "WEB" })
       .getMany();
     const formatedBooking = bookings.map((booking) => {
       delete booking.route.startLocation2.locationId
       delete booking.route.endLocation2.locationId
+      const dateTime = new Date(booking.route.timePickup);
+      // Lấy các thành phần của ngày và giờ
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const seconds = dateTime.getSeconds();
+      const day = dateTime.getDate();
+      const month = dateTime.getMonth() + 1; // Tháng bắt đầu từ 0
+      const year = dateTime.getFullYear();
+
+      // Định dạng lại thành chuỗi theo yêu cầu
+      const formattedDateTime = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
       return {
         // bookingId: booking.bookingId,
         // routeId: booking.route.routeId,
         phoneNumber: booking.customer.user.phoneNumber,
         username: booking.customer.user.username,
         status: booking.state.toLocaleLowerCase(),
+        timePickup: formattedDateTime,
         startLocation: booking.route.startLocation2,
         endLocation: booking.route.endLocation2,
       }
