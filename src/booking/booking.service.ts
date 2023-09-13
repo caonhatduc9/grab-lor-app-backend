@@ -298,8 +298,9 @@ export class BookingService {
       .leftJoinAndSelect("booking.route", "route")
       .leftJoinAndSelect("route.endLocation2", "endLocation")
       .leftJoinAndSelect("route.startLocation2", "startLocation")
-      .select(["booking.bookingId", "booking.state", "customer.customerId", "user.phoneNumber", "user.username", "route.routeId","route.timePickup", "startLocation", "endLocation"])
+      .select(["booking.bookingId", "booking.state", "customer.customerId", "user.phoneNumber", "user.username", "route.routeId", "route.timePickup", "startLocation", "endLocation"])
       .where("booking.typeBooking = :typeBooking", { typeBooking: "WEB" })
+      .orderBy("booking.bookingId", "DESC")
       .getMany();
     const formatedBooking = bookings.map((booking) => {
       delete booking.route.startLocation2.locationId
